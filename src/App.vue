@@ -34,7 +34,7 @@
 	  	  	  res.json().then(newBoard => {
 	  	  	  	  this.board = newBoard;
 	  	  	  }, err => {
-				  console.log(`res.json() ${err}`);
+				  console.log(`res.json() ${err.body}`);
 			  });
 	  	  },
 	  	  startGame: function (mode) {
@@ -42,14 +42,14 @@
 			Vue.http.post('/startgame', { mode:mode }).then(response => {
 				this.updateBoard(response)
 			}, err => {
-				console.log(`/startgame ${err}`)
+				console.log(`/startgame ${err.body}`)
 			})
 		  },
 		  play: function (x, y) {
 		  	  Vue.http.post('/play', { x:x, y:y, player:this.id }).then(response => {
 				this.updateBoard(response)
 		  	  }, err => {
-		  	  	console.log(`/play ${err}`)
+		  	  	console.log(`/play ${err.body}`)
 		  	  })
 		  },
 	  }
