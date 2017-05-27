@@ -32,7 +32,6 @@
 	  	  updateBoard: function (res) {
 	  	  	  res.json().then(newBoard => {
 	  	  	  	  this.board = newBoard;
-	  	  	  	  console.log(this.board);
 	  	  	  }, err => {
 				console.log("res.json() error");
 			  });
@@ -46,7 +45,7 @@
 			})
 		  },
 		  play: function (x, y) {
-		  	  Vue.http.post('/play', { x:x, y:y }).then(response => {
+		  	  Vue.http.post('/play', { x:x, y:y, player:"toto" }).then(response => {
 				this.updateBoard(response)
 		  	  }, response => {
 		  	  	console.log('/play Error response')
