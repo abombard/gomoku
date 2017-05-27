@@ -33,7 +33,7 @@ func hello(w http.ResponseWriter, r *http.Request) {
 
 // Init
 type start struct {
-	Mode string
+	Mode   string
 	Player string
 }
 
@@ -113,7 +113,7 @@ func play(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if t.Player != players[current] {
-		http.Error(w, "Not your turn " + t.Player + " != " + players[current], 400)
+		http.Error(w, "Not your turn "+t.Player+" != "+players[current], 400)
 		return
 	}
 	g.Board[t.X][t.Y] = current + 1
