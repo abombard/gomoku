@@ -22,6 +22,7 @@
 
   	  data () {
   	  	return {
+  	  		board: undefined
       	}
   	  },
 
@@ -29,8 +30,12 @@
 
 	  methods: {
 	  	  updateBoard: function (res) {
-	  	  	  this.board = res.json()
-	  	  	  console.log(this.board)
+	  	  	  res.json().then(newBoard => {
+	  	  	  	  this.board = newBoard;
+	  	  	  	  console.log(this.board);
+	  	  	  }, err => {
+				console.log("res.json() error");
+			  });
 	  	  },
 	  	  startGame: function (mode) {
 			console.log(`startGame ${mode}`);
