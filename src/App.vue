@@ -22,7 +22,7 @@
 
   	  data () {
   	  	return {
-  	  		id: Math.random() % 255,
+  	  		id: (Math.random() % 255).toString(),
   	  		board: undefined
       	}
   	  },
@@ -46,7 +46,7 @@
 			})
 		  },
 		  play: function (x, y) {
-		  	  Vue.http.post('/play', { x:x, y:y, player:"this.id" }).then(response => {
+		  	  Vue.http.post('/play', { x:x, y:y, player:this.id }).then(response => {
 				this.updateBoard(response)
 		  	  }, err => {
 		  	  	console.log(`/play ${err}`)
