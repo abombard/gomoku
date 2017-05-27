@@ -22,7 +22,6 @@
 
   	  data () {
   	  	return {
-      	  board: b
       	}
   	  },
 
