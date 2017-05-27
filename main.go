@@ -117,12 +117,11 @@ func play(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	g.Board[t.X][t.Y] = current + 1
-	current += 1
+	current = (current + 1) % 2
 	if g.Mode == "solo" {
 		aiPlay()
-		current += 1
+		current = 0
 	}
-	current %= 2
 	processPlay(t)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
