@@ -1,15 +1,17 @@
 <template>
-  <div>
-  	  <button
-  	  	id="StartGame"
-  	  	v-on:click="startGame"
-  	  >
-  	  	Start Game
+  <div v-if="board === undefined">
+  	  <button v-on:click="startGame('solo')">
+  	  	  Solo
   	  </button>
-  	  <Board
-  	  	:board="this.board"
-  	  	:cellOnClick="this.play"
-  	  />
+  	  <button v-on:click="startGame('multi')">
+  	  	  Multi
+  	  </button>
+  </div>
+  <div v-else>
+  <Board
+  	:board="this.board"
+  	:cellOnClick="this.play"
+  />
   </div>
 </template>
 
@@ -19,10 +21,6 @@
 	export default {
 
   	  data () {
-  	  	var b = new Array(19);
-  	  	for (var i = 0; i < 19; i ++) {
-  	  		b[i] = new Array(19).fill("0");
-  	  	}
   	  	return {
       	  board: b
       	}
@@ -32,6 +30,7 @@
 
 	  methods: {
 	  	  startGame: function (mode) {
+			console.log(`startGame ${mode}`);
 			Vue.http.post('/startgame', { mode:mode }).then(response => {
 				this.board = response.board;
 			}, response => {
