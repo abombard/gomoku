@@ -1,14 +1,14 @@
 package main
 
-import (
-	"log"
-)
+import "log"
 
 func aiPlay() {
 	coords := getPossiblePlays()
 	coord := heuristic(coords)
-	g.Board[coord.X][coord.Y] = 1
-	log.Println("COULDNT FIND PLAY")
+	if g.Board[coord.X][coord.Y] != 0 {
+		log.Fatal("BAD PLAY")
+	}
+	g.Board[coord.X][coord.Y] = 2
 }
 
 func checkHorizontalScore(c coord) int {
@@ -16,9 +16,9 @@ func checkHorizontalScore(c coord) int {
 	x := -2
 	for ; x < 3; x++ {
 		if c.X+x >= 0 && c.X+x < 19 {
-			if g.Board[c.X+x][c.Y] == 2 {
-				score -= 1
-			} else if g.Board[c.X+x][c.Y] == 1 {
+			if g.Board[c.X+x][c.Y] == 1 {
+				score += 1
+			} else if g.Board[c.X+x][c.Y] == 2 {
 				score += 1
 			}
 		}
@@ -31,9 +31,9 @@ func checkVerticalScore(c coord) int {
 	y := -2
 	for ; y < 3; y++ {
 		if c.Y+y >= 0 && c.Y+y < 19 {
-			if g.Board[c.X][c.Y+y] == 2 {
-				score -= 1
-			} else if g.Board[c.X][c.Y+y] == 1 {
+			if g.Board[c.X][c.Y+y] == 1 {
+				score += 1
+			} else if g.Board[c.X][c.Y+y] == 2 {
 				score += 1
 			}
 		}
@@ -48,9 +48,9 @@ func checkDiagonalScore(c coord) int {
 	for x < 3 {
 		for y < 3 {
 			if c.Y+y >= 0 && c.Y+y < 19 && c.X+x >= 0 && c.X+x < 19 {
-				if g.Board[c.X+x][c.Y+y] == 2 {
-					score -= 1
-				} else if g.Board[c.X+x][c.Y+y] == 1 {
+				if g.Board[c.X+x][c.Y+y] == 1 {
+					score += 1
+				} else if g.Board[c.X+x][c.Y+y] == 2 {
 					score += 1
 				}
 			}
@@ -70,7 +70,9 @@ func heuristic(coords []coord) coord {
 		currentScore += checkVerticalScore(coord)
 		currentScore += checkDiagonalScore(coord)
 		if currentScore > best {
+			best = currentScore
 			bestCoord = coord
+			log.Println("FOUND A NEW BEST MOVE")
 		}
 	}
 	return bestCoord
@@ -81,6 +83,7 @@ func isPawnNearby(xtarg, ytarg int) bool {
 	x := -2
 	y := -2
 	for ; x < 3; x++ {
+		y = -2
 		for ; y < 3; y++ {
 			if xtarg+x >= 0 && xtarg+x < 19 && ytarg+y >= 0 && ytarg+y < 19 {
 				if g.Board[xtarg+x][ytarg+y] != 0 {
@@ -99,7 +102,7 @@ func getPossiblePlays() []coord {
 
 	for x := range g.Board {
 		for y := range g.Board {
-			if isPawnNearby(x, y) == true {
+			if isPawnNearby(x, y) == true && g.Board[x][y] == 0 {
 				coords = append(coords, coord{X: x, Y: y})
 			}
 		}
