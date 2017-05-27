@@ -39,7 +39,7 @@
 	  	  },
 	  	  startGame: function (mode) {
 			console.log(`startGame ${mode}`);
-			Vue.http.post('/startgame', { mode:mode }).then(response => {
+			Vue.http.post('/startgame', { mode:mode, player:this.id }).then(response => {
 				this.updateBoard(response)
 			}, err => {
 				console.log(`/startgame ${err.body}`)

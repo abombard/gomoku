@@ -8,7 +8,7 @@ func aiPlay() {
 	coords := getPossiblePlays()
 	for _, coord := range coords {
 		if g.Board[coord.X][coord.Y] == 0 {
-			g.Board[coord.X][coord.Y] = 1
+			g.Board[coord.X][coord.Y] = 2
 			return
 		}
 

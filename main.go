@@ -18,8 +18,8 @@ type Gomoku struct {
 }
 
 var g Gomoku
-var player string
-var c int
+var players [2]string
+var current int = 0
 
 type coord struct {
 	X      int
@@ -27,17 +27,27 @@ type coord struct {
 	Player string
 }
 
-type start struct {
-	Mode string
-}
-
 func hello(w http.ResponseWriter, r *http.Request) {
 	io.WriteString(w, "GOMOKU")
 }
 
+// Init
+type start struct {
+	Mode string
+	Player string
+}
+
+func resetBoard() {
+	for x := range g.Board {
+		for y := range g.Board {
+			g.Board[x][y] = 0
+		}
+	}
+}
+
 func reset(w http.ResponseWriter, r *http.Request) {
 	resetBoard()
-	c = 0
+	current = 0
 	w.WriteHeader(200)
 }
 
@@ -50,6 +60,18 @@ func startGame(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 	g.Mode = t.Mode
+	if g.Mode == "solo" {
+		if players[0] == "" {
+			players[0] = t.Player
+			players[1] = "AI"
+		}
+	} else if g.Mode == "multi" {
+		if players[0] == "" {
+			players[0] = t.Player
+		} else if players[1] == "" {
+			players[1] = t.Player
+		}
+	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	json.NewEncoder(w).Encode(g.Board)
@@ -90,35 +112,20 @@ func play(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Already played here", 400)
 		return
 	}
-	if player == t.Player {
-		http.Error(w, "Already Played", 400)
+	if t.Player != players[current] {
+		http.Error(w, "Not your turn " + t.Player + " != " + players[current], 400)
 		return
 	}
-	player = t.Player
-	if g.Mode == "multi" {
-		if c%2 == 0 {
-			g.Board[t.X][t.Y] = 2
-		} else {
-			g.Board[t.X][t.Y] = 1
-		}
-		c++
-	} else if g.Mode == "solo" {
-		g.Board[t.X][t.Y] = 2
+	g.Board[t.X][t.Y] = current + 1
+	current = (current + 1) % 2
+	if g.Mode == "solo" {
 		aiPlay()
-		player = "AI"
+		current = 0
 	}
 	processPlay(t)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	json.NewEncoder(w).Encode(g.Board)
-}
-
-func resetBoard() {
-	for x := range g.Board {
-		for y := range g.Board {
-			g.Board[x][y] = 0
-		}
-	}
 }
 
 func main() {
