@@ -16,6 +16,31 @@ func aiPlay() {
 	log.Println("COULDNT FIND PLAY")
 }
 
+func checkHorizontalScore(c coord) int {
+	score := 0
+	x := -2
+	for x < 3 {
+		if c.X+x >= 0 && c.X+x < 19 {
+		}
+	}
+}
+
+func heuristic(coords []coord) coord {
+	best := 0
+	bestCoord := coords[0]
+	for _, coord := range coords {
+		currentScore := 0
+		currentScore += checkHorizontalScore(coord)
+		currentScore += checkVerticalScore(coord)
+		currentScore += checkDiagonalScore(coord)
+		if currentScore > best {
+			bestCoord = coord
+		}
+	}
+	return bestCoord
+
+}
+
 func isPawnNearby(xtarg, ytarg int) bool {
 	x := -2
 	y := -2
