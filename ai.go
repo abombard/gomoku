@@ -6,23 +6,59 @@ import (
 
 func aiPlay() {
 	coords := getPossiblePlays()
-	for _, coord := range coords {
-		if g.Board[coord.X][coord.Y] == 0 {
-			g.Board[coord.X][coord.Y] = 2
-			return
-		}
-
-	}
+	coord := heuristic(coords)
+	g.Board[coord.X][coord.Y] = 1
 	log.Println("COULDNT FIND PLAY")
 }
 
 func checkHorizontalScore(c coord) int {
 	score := 0
 	x := -2
-	for x < 3 {
+	for ; x < 3; x++ {
 		if c.X+x >= 0 && c.X+x < 19 {
+			if g.Board[c.X+x][c.Y] == 2 {
+				score -= 1
+			} else if g.Board[c.X+x][c.Y] == 1 {
+				score += 1
+			}
 		}
 	}
+	return score
+}
+
+func checkVerticalScore(c coord) int {
+	score := 0
+	y := -2
+	for ; y < 3; y++ {
+		if c.Y+y >= 0 && c.Y+y < 19 {
+			if g.Board[c.X][c.Y+y] == 2 {
+				score -= 1
+			} else if g.Board[c.X][c.Y+y] == 1 {
+				score += 1
+			}
+		}
+	}
+	return score
+}
+
+func checkDiagonalScore(c coord) int {
+	score := 0
+	y := -2
+	x := -2
+	for x < 3 {
+		for y < 3 {
+			if c.Y+y >= 0 && c.Y+y < 19 && c.X+x >= 0 && c.X+x < 19 {
+				if g.Board[c.X+x][c.Y+y] == 2 {
+					score -= 1
+				} else if g.Board[c.X+x][c.Y+y] == 1 {
+					score += 1
+				}
+			}
+			y++
+		}
+		x++
+	}
+	return score
 }
 
 func heuristic(coords []coord) coord {
