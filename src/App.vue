@@ -22,6 +22,7 @@
 
   	  data () {
   	  	return {
+  	  		id: Math.random() % 255,
   	  		board: undefined
       	}
   	  },
@@ -33,22 +34,22 @@
 	  	  	  res.json().then(newBoard => {
 	  	  	  	  this.board = newBoard;
 	  	  	  }, err => {
-				console.log("res.json() error");
+				  console.log(`res.json() ${err}`);
 			  });
 	  	  },
 	  	  startGame: function (mode) {
 			console.log(`startGame ${mode}`);
 			Vue.http.post('/startgame', { mode:mode }).then(response => {
 				this.updateBoard(response)
-			}, response => {
-				console.log('/startgame Error response')
+			}, err => {
+				console.log(`/startgame ${err}`)
 			})
 		  },
 		  play: function (x, y) {
-		  	  Vue.http.post('/play', { x:x, y:y, player:"toto" }).then(response => {
+		  	  Vue.http.post('/play', { x:x, y:y, player:"this.id" }).then(response => {
 				this.updateBoard(response)
-		  	  }, response => {
-		  	  	console.log('/play Error response')
+		  	  }, err => {
+		  	  	console.log(`/play ${err}`)
 		  	  })
 		  },
 	  }
