@@ -137,6 +137,8 @@ func main() {
 	// It's important that this is before your catch-all route ("/")
 	api := r.PathPrefix("/api/v1/").Subrouter()
 	api.HandleFunc("/startgame", startGame).Methods("POST")
+	api.HandleFunc("/play", play).Methods("POST")
+	api.HandleFunc("/reset", reset).Methods("GET")
 	// Optional: Use a custom 404 handler for our API paths.
 	// api.NotFoundHandler = JSONNotFound
 
