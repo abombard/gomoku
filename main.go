@@ -124,7 +124,7 @@ func main() {
 	var static string
 	var port string
 
-	flag.StringVar(&entry, "entry", "./client/index.html", "the entrypoint to serve.")
+	flag.StringVar(&entry, "entry", "index.html", "the entrypoint to serve.")
 	flag.StringVar(&static, "static", ".", "the directory to serve static files from.")
 	flag.StringVar(&port, "port", "8000", "the `port` to listen on.")
 	flag.Parse()
@@ -141,7 +141,7 @@ func main() {
 	// api.NotFoundHandler = JSONNotFound
 
 	// Serve static assets directly.
-	r.PathPrefix("/client/dist").Handler(http.FileServer(http.Dir(static)))
+	r.PathPrefix("/dist").Handler(http.FileServer(http.Dir(static)))
 
 	// Catch-all: Serve our JavaScript application's entry-point (index.html).
 	r.PathPrefix("/").HandlerFunc(IndexHandler(entry))
