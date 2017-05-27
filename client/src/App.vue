@@ -1,5 +1,5 @@
 <template>
-  <div id="app">
+  <div>
   	  <button
   	  	id="StartGame"
   	  	v-on:click="startGame"
@@ -32,17 +32,17 @@
 
 	  methods: {
 	  	  startGame: function (mode) {
-			this.$http.post('/startgame', { mode:mode }).then(response => {
+			Vue.http.post('/startgame', { mode:mode }).then(response => {
 				this.board = response.board;
 			}, response => {
-				Console.log('/startgame Error response')
+				console.log('/startgame Error response')
 			})
 		  },
 		  play: function (x, y) {
-		  	  this.$http.post('/play', { x: "x", y: "y" }).then(response => {
+		  	  Vue.http.post('/play', { x:x, y:y }).then(response => {
 		  	  	  this.board = response.board;
 		  	  }, response => {
-		  	  	  Console.log('/play Error response')
+		  	  	  console.log('/play Error response')
 		  	  })
 		  },
 	  }
@@ -50,5 +50,8 @@
 
 </script>
 
-<style lang="scss">
+<style>
+.App {
+	display: flex;
+}
 </style>
