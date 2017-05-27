@@ -31,7 +31,7 @@
 	  	  startGame: function (mode) {
 			console.log(`startGame ${mode}`);
 			Vue.http.post('/startgame', { mode:mode }).then(response => {
-				this.board = response.board;
+				this.board = JSON.parse(response.body);
 			}, response => {
 				console.log('/startgame Error response')
 			})

@@ -50,6 +50,9 @@ func startGame(w http.ResponseWriter, r *http.Request) {
 	}
 	defer r.Body.Close()
 	g.Mode = t.Mode
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	json.NewEncoder(w).Encode(g.Board)
 
 }
 
@@ -135,10 +138,10 @@ func main() {
 	// package, given the coupling between them.
 
 	// It's important that this is before your catch-all route ("/")
-	api := r.PathPrefix("/api/v1/").Subrouter()
-	api.HandleFunc("/startgame", startGame).Methods("POST")
-	api.HandleFunc("/play", play).Methods("POST")
-	api.HandleFunc("/reset", reset).Methods("GET")
+	//	api := r.PathPrefix("/api/v1/").Subrouter()
+	r.HandleFunc("/startgame", startGame).Methods("POST")
+	r.HandleFunc("/play", play).Methods("POST")
+	r.HandleFunc("/reset", reset).Methods("GET")
 	// Optional: Use a custom 404 handler for our API paths.
 	// api.NotFoundHandler = JSONNotFound
 
@@ -146,7 +149,7 @@ func main() {
 	r.PathPrefix("/dist").Handler(http.FileServer(http.Dir(static)))
 
 	// Catch-all: Serve our JavaScript application's entry-point (index.html).
-	r.PathPrefix("/").HandlerFunc(IndexHandler(entry))
+	r.HandleFunc("/", IndexHandler(entry))
 
 	srv := &http.Server{
 		Handler: handlers.LoggingHandler(os.Stdout, r),
