@@ -8,10 +8,10 @@
   	  </button>
   </div>
   <div v-else>
-  <Board
-  	:board="this.board"
-  	:cellOnClick="this.play"
-  />
+  	  <Board
+  		:board="this.board"
+  		:cellOnClick="this.play"
+  	  />
   </div>
 </template>
 
@@ -28,19 +28,23 @@
 	  components: { Board },
 
 	  methods: {
+	  	  updateBoard: function (res) {
+	  	  	  this.board = res.json()
+	  	  	  console.log(this.board)
+	  	  }
 	  	  startGame: function (mode) {
 			console.log(`startGame ${mode}`);
 			Vue.http.post('/startgame', { mode:mode }).then(response => {
-				this.board = response.board;
+				updateBoard(response)
 			}, response => {
 				console.log('/startgame Error response')
 			})
 		  },
 		  play: function (x, y) {
 		  	  Vue.http.post('/play', { x:x, y:y }).then(response => {
-		  	  	  this.board = response.board;
+				updateBoard(response)
 		  	  }, response => {
-		  	  	  console.log('/play Error response')
+		  	  	console.log('/play Error response')
 		  	  })
 		  },
 	  }
