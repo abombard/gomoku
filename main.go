@@ -137,6 +137,8 @@ func main() {
 	// It's important that this is before your catch-all route ("/")
 	api := r.PathPrefix("/api/v1/").Subrouter()
 	api.HandleFunc("/startgame", startGame).Methods("POST")
+	api.HandleFunc("/play", play).Methods("POST")
+	api.HandleFunc("/reset", reset).Methods("GET")
 	// Optional: Use a custom 404 handler for our API paths.
 	// api.NotFoundHandler = JSONNotFound
 
@@ -163,19 +165,4 @@ func IndexHandler(entrypoint string) func(w http.ResponseWriter, r *http.Request
 	}
 
 	return http.HandlerFunc(fn)
-}
-
-func GetUsersHandler(w http.ResponseWriter, r *http.Request) {
-	data := map[string]interface{}{
-		"id": "12345",
-		"ts": time.Now().Format(time.RFC3339),
-	}
-
-	b, err := json.Marshal(data)
-	if err != nil {
-		http.Error(w, err.Error(), 400)
-		return
-	}
-
-	w.Write(b)
 }
