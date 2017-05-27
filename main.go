@@ -141,7 +141,7 @@ func main() {
 	// api.NotFoundHandler = JSONNotFound
 
 	// Serve static assets directly.
-	r.PathPrefix("/dist").Handler(http.FileServer(http.Dir(static)))
+	r.PathPrefix("/client/dist").Handler(http.FileServer(http.Dir(static)))
 
 	// Catch-all: Serve our JavaScript application's entry-point (index.html).
 	r.PathPrefix("/").HandlerFunc(IndexHandler(entry))
