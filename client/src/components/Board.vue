@@ -20,15 +20,6 @@
 </script>
 
 <style scoped>
-.Board {
-	border: 3px solid #fff;
-	width: 70vh;
-	display: flex;
-	height: 70vh;
-	margin: auto;
-	flex-flow: row nowrap;
-}
-
 .Row {
 	flex: 1;
 	display: flex;

@@ -54,4 +54,13 @@
 .App {
 	display: flex;
 }
+
+.Board {
+	border: 3px solid #fff;
+	width: 70vh;
+	display: flex;
+	height: 70vh;
+	margin: auto;
+	flex-flow: row nowrap;
+}
 </style>
