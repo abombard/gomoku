@@ -4,7 +4,7 @@ import "log"
 
 func aiPlay() {
 	coords := getPossiblePlays()
-	coord := heuristic(coords)
+	coord := maxi(coords)
 	err := isValidMove(coord)
 	if err != nil {
 		println(err)
@@ -12,211 +12,134 @@ func aiPlay() {
 	move(coord)
 }
 
-func max(a, b int) int {
-	if a > b {
-		return a
-	}
-	return b
-}
+type fn func(x, y int) bool
 
-func checkHorizontalScore(c coord) int {
+func horizontalScore(me, him fn) int {
 	score := 0
-	ennemyScore := 0
-	bestRightScore := 0
-	bestLeftScore := 0
-	bestRightEnnemyScore := 0
-	bestLeftEnnemyScore := 0
-	for x := -4; x < 0 && isValidCoord(c.X+x, c.Y); x++ {
-		if isEnemy(c.X+x, c.Y) {
-			ennemyScore += 2
-			score = 0
-		} else if isMe(c.X+x, c.Y) {
-			score += 2
-			ennemyScore = 0
+	finalScore := 0
+	for y := 0; y < HEIGHT; y++ {
+		for x := 0; isValidCoord(x, y); x++ {
+			tmpx := x
+			for ; me(tmpx, y); tmpx++ {
+				score++
+			}
+			if score != 0 {
+				tmpx = x
+				space := 0
+				spaceOk := false
+				for ; isValidCoord(tmpx, y) && (me(tmpx, y) || !him(tmpx, y)); tmpx-- {
+					space++
+					if space >= 5 {
+						spaceOk = true
+						break
+					}
+
+				}
+				if !spaceOk {
+					tmpx = x + score
+					for ; isValidCoord(tmpx, y) && (me(tmpx, y) || !him(tmpx, y)); tmpx++ {
+						space++
+						if space+score >= 5 {
+							spaceOk = true
+							break
+						}
+
+					}
+				}
+				if spaceOk {
+					finalScore += score
+				}
+				score = 0
+			}
 		}
 	}
-	bestLeftScore = score
-	bestLeftEnnemyScore = ennemyScore
-	score = 0
-	ennemyScore = 0
-	for x := 4; x > 0 && isValidCoord(c.X+x, c.Y); x-- {
-		if isEnemy(c.X+x, c.Y) {
-			ennemyScore += 2
-			score = 0
-		} else if isMe(c.X+x, c.Y) {
-			score += 2
-			ennemyScore = 0
-		}
-	}
-	bestRightScore = score
-	bestRightEnnemyScore = ennemyScore
-	if bestLeftScore > bestLeftEnnemyScore && bestRightScore > bestRightEnnemyScore {
-		return bestLeftScore + bestRightScore
-	}
-	if bestLeftScore < bestLeftEnnemyScore && bestRightScore < bestRightEnnemyScore {
-		return bestLeftEnnemyScore + bestRightEnnemyScore
-	}
-	maxScore := max(bestLeftScore, bestRightScore)
-	maxEnnemyScore := max(bestLeftEnnemyScore, bestRightEnnemyScore)
-	return max(maxScore, maxEnnemyScore)
+	return finalScore
+
 }
 
-func checkVerticalScore(c coord) int {
+func verticalScore(me, him fn) int {
 	score := 0
-	ennemyScore := 0
-	bestRightScore := 0
-	bestLeftScore := 0
-	bestRightEnnemyScore := 0
-	bestLeftEnnemyScore := 0
-	for y := -4; y < 0 && isValidCoord(c.X, c.Y+y); y++ {
-		if isEnemy(c.X, c.Y+y) {
-			ennemyScore += 2
-			score = 0
-		} else if isMe(c.X, c.Y+y) {
-			score += 2
-			ennemyScore = 0
+	finalScore := 0
+	for x := 0; x < HEIGHT; x++ {
+		for y := 0; isValidCoord(x, y); y++ {
+			tmpy := y
+			for ; me(x, tmpy); tmpy++ {
+				score++
+			}
+			if score != 0 {
+				tmpy = y
+				space := 0
+				spaceOk := false
+				for ; isValidCoord(x, tmpy) && (me(x, tmpy) || !him(x, tmpy)); tmpy-- {
+					space++
+					if space >= 5 {
+						spaceOk = true
+						break
+					}
+
+				}
+				if !spaceOk {
+					tmpy = y + score
+					for ; isValidCoord(x, tmpy) && (me(x, tmpy) || !him(x, tmpy)); tmpy++ {
+						space++
+						if space+score >= 5 {
+							spaceOk = true
+							break
+						}
+
+					}
+				}
+				if spaceOk {
+					finalScore += score
+				}
+				score = 0
+			}
 		}
 	}
-	bestLeftScore = score
-	bestLeftEnnemyScore = ennemyScore
-	score = 0
-	ennemyScore = 0
-	for y := 4; y > 0 && isValidCoord(c.X, c.Y+y); y-- {
-		if isEnemy(c.X, c.Y+y) {
-			ennemyScore += 2
-			score = 0
-		} else if isMe(c.X, c.Y+y) {
-			score += 2
-			ennemyScore = 0
-		}
-	}
-	bestRightScore = score
-	bestRightEnnemyScore = ennemyScore
-	if bestLeftScore > bestLeftEnnemyScore && bestRightScore > bestRightEnnemyScore {
-		return bestLeftScore + bestRightScore
-	}
-	if bestLeftScore < bestLeftEnnemyScore && bestRightScore < bestRightEnnemyScore {
-		return bestLeftEnnemyScore + bestRightEnnemyScore
-	}
-	maxScore := max(bestLeftScore, bestRightScore)
-	maxEnnemyScore := max(bestLeftEnnemyScore, bestRightEnnemyScore)
-	return max(maxScore, maxEnnemyScore)
+	return finalScore
+
 }
 
-func checkDiagonalScore(c coord) int {
-	score := 0
-	ennemyScore := 0
-	bestRightScore := 0
-	bestLeftScore := 0
-	bestRightEnnemyScore := 0
-	bestLeftEnnemyScore := 0
-	for x, y := -4, -4; y < 0 && x < 0 && isValidCoord(c.X+x, c.Y+y); x, y = x+1, y+1 {
-		if isEnemy(c.X+x, c.Y+y) {
-			ennemyScore += 2
-			score = 0
-		} else if isMe(c.X+x, c.Y+y) {
-			score += 2
-			ennemyScore = 0
-		}
-	}
-	bestLeftScore = score
-	bestLeftEnnemyScore = ennemyScore
-	score = 0
-	ennemyScore = 0
-	for x, y := 4, 4; y > 0 && x > 0 && isValidCoord(c.X+x, c.Y+y); x, y = x-1, y-1 {
-		if isEnemy(c.X+x, c.Y+y) {
-			ennemyScore += 2
-			score = 0
-		} else if isMe(c.X+x, c.Y+y) {
-			score += 2
-			ennemyScore = 0
-		}
-	}
-	bestRightScore = score
-	bestRightEnnemyScore = ennemyScore
-	if bestLeftScore > bestLeftEnnemyScore && bestRightScore > bestRightEnnemyScore {
-		return bestLeftScore + bestRightScore
-	}
-	if bestLeftScore < bestLeftEnnemyScore && bestRightScore < bestRightEnnemyScore {
-		return bestLeftEnnemyScore + bestRightEnnemyScore
-	}
-	maxScore := max(bestLeftScore, bestRightScore)
-	maxEnnemyScore := max(bestLeftEnnemyScore, bestRightEnnemyScore)
-	return max(maxScore, maxEnnemyScore)
-}
-func checkDiagonalScore2(c coord) int {
-	score := 0
-	ennemyScore := 0
-	bestRightScore := 0
-	bestLeftScore := 0
-	bestRightEnnemyScore := 0
-	bestLeftEnnemyScore := 0
-	for x, y := -4, 4; y > 0 && x < 0 && isValidCoord(c.X+x, c.Y+y); x, y = x+1, y-1 {
-		if isEnemy(c.X+x, c.Y+y) {
-			ennemyScore += 2
-			score = 0
-		} else if isMe(c.X+x, c.Y+y) {
-			score += 2
-			ennemyScore = 0
-		}
-	}
-	bestLeftScore = score
-	bestLeftEnnemyScore = ennemyScore
-	score = 0
-	ennemyScore = 0
-	for x, y := 4, -4; y < 0 && x > 0 && isValidCoord(c.X+x, c.Y+y); x, y = x-1, y+1 {
-		if isEnemy(c.X+x, c.Y+y) {
-			ennemyScore += 2
-			score = 0
-		} else if isMe(c.X+x, c.Y+y) {
-			score += 2
-			ennemyScore = 0
-		}
-	}
-	bestRightScore = score
-	bestRightEnnemyScore = ennemyScore
-	if bestLeftScore > bestLeftEnnemyScore && bestRightScore > bestRightEnnemyScore {
-		return bestLeftScore + bestRightScore
-	}
-	if bestLeftScore < bestLeftEnnemyScore && bestRightScore < bestRightEnnemyScore {
-		return bestLeftEnnemyScore + bestRightEnnemyScore
-	}
-	maxScore := max(bestLeftScore, bestRightScore)
-	maxEnnemyScore := max(bestLeftEnnemyScore, bestRightEnnemyScore)
-	return max(maxScore, maxEnnemyScore)
+type resp struct {
+	C     coord
+	Score int
 }
 
-func heuristic(coords []coord) coord {
-	best := 0
-	bestCoord := coords[0]
-	for _, coord := range coords {
-		currentScore := 0
-		log.Println(coord)
-		currentScore += checkHorizontalScore(coord)
-		log.Println("Horizontal score: ", currentScore)
-		tmp := checkVerticalScore(coord)
-		if tmp > currentScore {
-			currentScore = tmp
-		}
-		log.Println("Vertical score: ", tmp)
-		tmp = checkDiagonalScore(coord)
-		if tmp > currentScore {
-			currentScore = tmp
-		}
-		log.Println("Diag score: ", tmp)
-		tmp = checkDiagonalScore2(coord)
-		if tmp > currentScore {
-			currentScore = tmp
-		}
-		log.Println("Diag2 score: ", tmp)
-		if currentScore > best {
-			best = currentScore
-			bestCoord = coord
-		}
-		log.Println("_____________")
+func evaluate(c coord, ch chan resp) {
+	var tmp [19][19]int
+	for i, row := range g.Board {
+		tmp[i] = row
 	}
-	return bestCoord
+	tmp[c.X][c.Y] = 2
+	finalScore := 0
+	finalScore += horizontalScore(isMe, isEnemy)
+	finalScore -= horizontalScore(isEnemy, isMe)
+	finalScore += verticalScore(isMe, isEnemy)
+	finalScore -= verticalScore(isEnemy, isMe)
 
+	ch <- resp{C: c, Score: finalScore}
+}
+
+func maxi(coords []coord) coord {
+	var tmp [19][19]int
+	ch := make(chan resp, len(coords))
+	for i, row := range g.Board {
+		tmp[i] = row
+	}
+	for i, _ := range coords {
+		val := coords[i]
+		go evaluate(val, ch)
+	}
+	ret := resp{Score: -1000}
+	for i := 0; i < len(coords); i++ {
+		tmp := <-ch
+		log.Println(tmp)
+		if tmp.Score > ret.Score {
+			ret = tmp
+		}
+	}
+
+	return coord{X: ret.C.X, Y: ret.C.Y}
 }
 
 func isPawnNearby(xtarg, ytarg int) bool {
