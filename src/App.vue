@@ -1,26 +1,24 @@
 <template>
-  <div id="App">
-  	  <div v-if="board === undefined" class="w3-section">
-  	  	  <button
-  	  		class="w3-button w3-ripple w3-red w3-padding"
+	<div v-if="board == undefined" class="w3-section">
+  		<button
+  			class="w3-button w3-ripple w3-red w3-padding"
   	    	v-on:click="startGame('solo')"
-  	  	  >
+  	  	>
   	  		Solo
-  	  	  </button>
-  	  	  <button
-  	  	  	  class="w3-button w3-ripple w3-purple"
-  	  	  	  v-on:click="startGame('multi')"
-  	  	  >
+  	  	</button>
+  	  	<button
+  	  	  	class="w3-button w3-ripple w3-purple"
+  	  	  	v-on:click="startGame('multi')"
+  	  	>
   	  		Multi
-  	  	  </button>
-  	  </div>
-  	  <div v-else>
-  	  	  <Board
+  	  	</button>
+  	</div>
+	<div v-else id="App">
+  		<Board
   			:board="this.board"
   			:cellOnClick="this.play"
-  	  	  />
-  	  </div>
-  </div>
+  		/>
+  	</div>
 </template>
 
 <script>
@@ -65,6 +63,8 @@
 
 </script>
 
-<style src="../node_modules/w3-css/w3.css">
+<style scoped>
+.App {
+	display: flex
+}
 </style>
-

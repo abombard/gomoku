@@ -1,11 +1,16 @@
 <template>
- 	<div class="Board">
+ 	<div class="Grid">
 		<div class="Row"
 			v-for="(row, x) in board">
-			<div class="Cell"
+			<div class="Cell w3-border w3-center"
 				v-for="(cell, y) in row"
 				v-on:click="cellOnClick(x, y)">
-   				{{ cell }}
+				<div v-if="cell==1" class="CellText w3-green">
+					{{ cell }}
+				</div>
+				<div v-else-if="cell==2" class="CellText w3-indigo">
+   					{{ cell }}
+   				</div>
    			</div>
    		</div>
 	</div>
@@ -20,6 +25,14 @@
 </script>
 
 <style scoped>
+.Grid {
+	width: 70vh;
+	display: flex;
+	height: 70vh;
+	margin: auto;
+	flex-flow: row nowrap;
+}
+
 .Row {
 	flex: 1;
 	display: flex;
@@ -29,5 +42,10 @@
 .Cell {
 	border: 1px solid #000;
 	flex: 1;
+}
+
+.CellText {
+	height:100%;
+	width:100%;
 }
 </style>
