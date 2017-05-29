@@ -160,7 +160,7 @@ func canBeCaptured(x, y int) bool {
 		x2, y2 := x+p2[0], y+p2[1]
 		x3, y3 := x+p3[0], y+p3[1]
 		x4, y4 := x+p4[0], y+p4[1]
-		if isValidCoord(x1, y2) && isValidCoord(x2, y2) && isValidCoord(x3, y3) {
+		if isValidCoord(x1, y1) && isValidCoord(x2, y2) && isValidCoord(x3, y3) {
 			if isMe(x2, y2) && ((isEmpty(x1, y1) && isEnemy(x3, y3)) || (isEnemy(x1, y1) && isEmpty(x3, y3))) {
 				return true
 			}
