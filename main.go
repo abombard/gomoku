@@ -78,20 +78,6 @@ func startGame(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func checkDoubleThree(t coord) error {
-
-	return nil
-}
-
-func processPlay(t coord) error {
-	ret := checkDoubleThree(t)
-	if ret != nil {
-		return ret
-	}
-
-	return ret
-}
-
 func play(w http.ResponseWriter, r *http.Request) {
 	if g.Mode == "" {
 		http.Error(w, "No mode selected yet", 400)
@@ -104,25 +90,17 @@ func play(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	defer r.Body.Close()
-	if t.X < 0 || t.X > 18 || t.Y < 0 || t.Y > 18 {
-		http.Error(w, "Out of board range", 400)
+	err = IsValidMove(t)
+	if err != nil {
+		http.Error(w, err.Error(), 400)
 		return
 	}
-	if g.Board[t.X][t.Y] == 2 || g.Board[t.X][t.Y] == 1 {
-		http.Error(w, "Already played here", 400)
-		return
-	}
-	if t.Player != players[current] {
-		http.Error(w, "Not your turn "+t.Player+" != "+players[current], 400)
-		return
-	}
-	g.Board[t.X][t.Y] = current + 1
+	Move(t)
 	if g.Mode == "solo" {
 		aiPlay()
 	} else if g.Mode == "multi" {
 		current = (current + 1) % 2
 	}
-	processPlay(t)
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	json.NewEncoder(w).Encode(g.Board)
