@@ -5,6 +5,10 @@ import "log"
 func aiPlay() {
 	coords := getPossiblePlays()
 	coord := heuristic(coords)
+	err := isValidMove(coord)
+	if err != nil {
+		println(err)
+	}
 	move(coord)
 }
 
