@@ -90,7 +90,7 @@ func play(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	defer r.Body.Close()
-	err = IsValidMove(t)
+	err = isValidMove(t)
 	if err != nil {
 		http.Error(w, err.Error(), 400)
 		return
@@ -101,7 +101,7 @@ func play(w http.ResponseWriter, r *http.Request) {
 		aiPlay()
 		current = (current + 1) % 2
 	}
-	if IsGameOver(t) {
+	if isGameOver(t) {
 		println("Game Over")
 	}
 	w.Header().Set("Content-Type", "application/json")
