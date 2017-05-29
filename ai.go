@@ -25,7 +25,7 @@ func isEmptyTmp(x, y int, tmp [19][19]int) bool {
 	return tmp[x][y] == 0
 }
 
-func horizontalScore(me, him fn, tmp [19][19]int) int {
+func horizontalScore(who string, me, him fn, tmp [19][19]int) int {
 	score := 0
 	finalScore := 0
 	for y := 0; y < HEIGHT; y++ {
@@ -40,7 +40,7 @@ func horizontalScore(me, him fn, tmp [19][19]int) int {
 				spaceOk := false
 				for ; isValidCoord(tmpx, y) && (me(tmpx, y, tmp) || !him(tmpx, y, tmp)); tmpx-- {
 					space++
-					if space >= 5 {
+					if space+score >= 5 {
 						spaceOk = true
 						break
 					}
@@ -59,6 +59,13 @@ func horizontalScore(me, him fn, tmp [19][19]int) int {
 				}
 				if spaceOk {
 					finalScore += score
+					if score == 4 {
+						if who == "me" {
+							finalScore += 100
+						} else {
+							finalScore -= 200
+						}
+					}
 				}
 				score = 0
 			}
@@ -68,7 +75,7 @@ func horizontalScore(me, him fn, tmp [19][19]int) int {
 
 }
 
-func verticalScore(me, him fn, tmp [19][19]int) int {
+func verticalScore(who string, me, him fn, tmp [19][19]int) int {
 	score := 0
 	finalScore := 0
 	for x := 0; x < HEIGHT; x++ {
@@ -83,7 +90,7 @@ func verticalScore(me, him fn, tmp [19][19]int) int {
 				spaceOk := false
 				for ; isValidCoord(x, tmpy) && (me(x, tmpy, tmp) || !him(x, tmpy, tmp)); tmpy-- {
 					space++
-					if space >= 5 {
+					if space+score >= 5 {
 						spaceOk = true
 						break
 					}
@@ -102,6 +109,13 @@ func verticalScore(me, him fn, tmp [19][19]int) int {
 				}
 				if spaceOk {
 					finalScore += score
+					if score == 4 {
+						if who == "me" {
+							finalScore += 100
+						} else {
+							finalScore -= 200
+						}
+					}
 				}
 				score = 0
 			}
@@ -123,10 +137,10 @@ func evaluate(c coord, ch chan resp) {
 	}
 	tmp[c.X][c.Y] = 2
 	finalScore := 0
-	finalScore += horizontalScore(isMeTmp, isEnemyTmp, tmp)
-	finalScore -= horizontalScore(isEnemyTmp, isMeTmp, tmp)
-	finalScore += verticalScore(isMeTmp, isEnemyTmp, tmp)
-	finalScore -= verticalScore(isEnemyTmp, isMeTmp, tmp)
+	finalScore += horizontalScore("me", isMeTmp, isEnemyTmp, tmp)
+	finalScore += horizontalScore("ennemy", isEnemyTmp, isMeTmp, tmp)
+	finalScore += verticalScore("me", isMeTmp, isEnemyTmp, tmp)
+	finalScore += verticalScore("ennemy", isEnemyTmp, isMeTmp, tmp)
 
 	ch <- resp{C: c, Score: finalScore}
 }
