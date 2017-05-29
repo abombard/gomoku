@@ -39,7 +39,6 @@ func checkHorizontalScore(c coord) int {
 	ennemyScore = 0
 	for ; x > 0; x-- {
 		for ; x > 0 && isValidCoord(c.X+x, c.Y) && isMe(c.X+x, c.Y); x-- {
-			log.Println("found me")
 			score = 0
 			ennemyScore += 1
 		}
