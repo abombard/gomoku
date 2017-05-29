@@ -1,7 +1,7 @@
 package main
 
 const (
-	WIDTH = 19
+	WIDTH  = 19
 	HEIGHT = 19
 )
 
@@ -10,11 +10,11 @@ func isValidCoord(x, y int) bool {
 }
 
 func isEnemy(x, y int) bool {
-	return g.Board[x][y] != current + 1
+	return g.Board[x][y] != current+1
 }
 
 func isMe(x, y int) bool {
-	return g.Board[x][y] == current + 1
+	return g.Board[x][y] == current+1
 }
 
 func isFree(x, y int) bool {
@@ -24,20 +24,20 @@ func isFree(x, y int) bool {
 func capture(x, y int, p int) {
 
 	checks := [8][3][2]int{
-		{ { -1, -1 }, { -2, -2 }, { -3, -3 } },
-		{ { -1,  0 }, { -2,  0 }, { -3,  0 } },
-		{ { -1,  1 }, { -2,  2 }, { -3,  3 } },
-		{ {  0,  1 }, {  0,  2 }, {  0,  3 } },
-		{ {  1,  1 }, {  2,  2 }, {  3,  3 } },
-		{ {  1,  0 }, {  2,  0 }, {  3,  0 } },
-		{ {  1, -1 }, {  2, -2 }, {  3, -3 } },
-		{ {  0, -1 }, {  0, -2 }, {  0, -3 } },
+		{{-1, -1}, {-2, -2}, {-3, -3}},
+		{{-1, 0}, {-2, 0}, {-3, 0}},
+		{{-1, 1}, {-2, 2}, {-3, 3}},
+		{{0, 1}, {0, 2}, {0, 3}},
+		{{1, 1}, {2, 2}, {3, 3}},
+		{{1, 0}, {2, 0}, {3, 0}},
+		{{1, -1}, {2, -2}, {3, -3}},
+		{{0, -1}, {0, -2}, {0, -3}},
 	}
 	for i := range checks {
 		p1, p2, p3 := checks[i][0], checks[i][1], checks[i][2]
-		x1, y1 := x + p1[0], y + p1[1]
-		x2, y2 := x + p2[0], y + p2[1]
-		x3, y3 := x + p3[0], y + p3[1]
+		x1, y1 := x+p1[0], y+p1[1]
+		x2, y2 := x+p2[0], y+p2[1]
+		x3, y3 := x+p3[0], y+p3[1]
 		if isValidCoord(x1, y1) && isValidCoord(x2, y2) && isValidCoord(x3, y3) {
 			if isEnemy(x1, y1) && isEnemy(x2, y2) && isMe(x3, y3) {
 				// Successfully captured
@@ -51,10 +51,10 @@ func capture(x, y int, p int) {
 func introduceDoubleThree(x, y int, p int) bool {
 
 	checks := [4][6][2]int{
-		{ { -3, -3 }, { -2, -2 }, { -1, -1 }, {  1,  1 }, {  2,  2 }, {  3,  3 } },
-		{ { -3,  0 }, { -2,  0 }, { -1,  0 }, {  1,  0 }, {  2,  0 }, {  3,  0 } },
-		{ { -3,  3 }, { -2,  2 }, { -1,  1 }, {  1, -1 }, {  2, -2 }, {  3, -3 } },
-		{ {  0,  3 }, {  0,  2 }, {  0,  1 }, {  0, -1 }, {  0, -2 }, {  0, -3 } },
+		{{-3, -3}, {-2, -2}, {-1, -1}, {1, 1}, {2, 2}, {3, 3}},
+		{{-3, 0}, {-2, 0}, {-1, 0}, {1, 0}, {2, 0}, {3, 0}},
+		{{-3, 3}, {-2, 2}, {-1, 1}, {1, -1}, {2, -2}, {3, -3}},
+		{{0, 3}, {0, 2}, {0, 1}, {0, -1}, {0, -2}, {0, -3}},
 	}
 
 	threeCount := 0
@@ -65,7 +65,7 @@ func introduceDoubleThree(x, y int, p int) bool {
 			if j == 3 {
 				count += 1
 				if count == 3 {
-					break ;
+					break
 				}
 			}
 			x1, y1 := checks[i][j][0], checks[i][j][1]
@@ -74,7 +74,7 @@ func introduceDoubleThree(x, y int, p int) bool {
 					blank = 0
 					count += 1
 					if count == 3 {
-						break ;
+						break
 					}
 				} else if isEnemy(x1, y1) {
 					blank = 0
@@ -98,20 +98,20 @@ func introduceDoubleThree(x, y int, p int) bool {
 func canBeCaptured(x, y int) bool {
 
 	checks := [][4][2]int{
-		{ { -2, -2 }, { -1, -1 }, {  1,  1 }, {  2,  2 } },
-		{ { -2,  0 }, { -1,  0 }, {  1,  0 }, {  2,  0 } },
-		{ { -2,  2 }, { -1,  1 }, {  1, -1 }, {  2, -2 } },
-		{ {  0,  2 }, {  0,  1 }, {  0, -1 }, {  0, -2 } },
+		{{-2, -2}, {-1, -1}, {1, 1}, {2, 2}},
+		{{-2, 0}, {-1, 0}, {1, 0}, {2, 0}},
+		{{-2, 2}, {-1, 1}, {1, -1}, {2, -2}},
+		{{0, 2}, {0, 1}, {0, -1}, {0, -2}},
 	}
 	for i := range checks {
 		p1, p2, p3, p4 := checks[i][0], checks[i][1], checks[i][2], checks[i][3]
-		x1, y1 := x + p1[0], y + p1[1]
-		x2, y2 := x + p2[0], y + p2[1]
-		x3, y3 := x + p3[0], y + p3[1]
-		x4, y4 := x + p4[0], y + p4[1]
+		x1, y1 := x+p1[0], y+p1[1]
+		x2, y2 := x+p2[0], y+p2[1]
+		x3, y3 := x+p3[0], y+p3[1]
+		x4, y4 := x+p4[0], y+p4[1]
 		if isValidCoord(x1, y2) && isValidCoord(x2, y2) && isValidCoord(x3, y3) {
 			if (isMe(x2, y2) && ((isFree(x1, y1) && isEnemy(x3, y3)) || (isEnemy(x1, y1) && isFree(x3, y3)))) ||
-			   (isMe(x3, y3) && ((isFree(x2, y2) && isEnemy(x4, y4)) || (isEnemy(x2, y2) && isFree(x4, y4)))) {
+				(isMe(x3, y3) && ((isFree(x2, y2) && isEnemy(x4, y4)) || (isEnemy(x2, y2) && isFree(x4, y4)))) {
 				return true
 			}
 		}
@@ -126,10 +126,10 @@ func isGameOver(x, y int) bool {
 	}
 
 	checks := [4][8][2]int{
-		{ { -4, -4 }, { -3, -3 }, { -2, -2 }, { -1, -1 }, {  1,  1 }, {  2,  2 }, {  3,  3 }, {  4,  4 } },
-		{ { -4,  0 }, { -3,  0 }, { -2,  0 }, { -1,  0 }, {  1,  0 }, {  2,  0 }, {  3,  0 }, {  4,  0 } },
-		{ { -4,  4 }, { -3,  3 }, { -2,  2 }, { -1,  1 }, {  1, -1 }, {  2, -2 }, {  3, -3 }, {  4, -4 } },
-		{ {  0, -4 }, {  0, -3 }, {  0, -2 }, {  0, -1 }, {  0,  1 }, {  0,  2 }, {  0,  3 }, {  0,  4 } },
+		{{-4, -4}, {-3, -3}, {-2, -2}, {-1, -1}, {1, 1}, {2, 2}, {3, 3}, {4, 4}},
+		{{-4, 0}, {-3, 0}, {-2, 0}, {-1, 0}, {1, 0}, {2, 0}, {3, 0}, {4, 0}},
+		{{-4, 4}, {-3, 3}, {-2, 2}, {-1, 1}, {1, -1}, {2, -2}, {3, -3}, {4, -4}},
+		{{0, -4}, {0, -3}, {0, -2}, {0, -1}, {0, 1}, {0, 2}, {0, 3}, {0, 4}},
 	}
 	for i := range checks {
 		count := 0
