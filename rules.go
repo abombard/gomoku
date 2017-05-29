@@ -144,6 +144,7 @@ func move(c coord) {
 	x, y := c.X, c.Y
 	tryCapture(x, y)
 	g.Board[x][y] = current + 1
+	current = (current + 1) % 2
 }
 
 func canBeCaptured(x, y int) bool {

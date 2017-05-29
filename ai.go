@@ -5,10 +5,7 @@ import "log"
 func aiPlay() {
 	coords := getPossiblePlays()
 	coord := heuristic(coords)
-	if g.Board[coord.X][coord.Y] != 0 {
-		log.Fatal("BAD PLAY")
-	}
-	g.Board[coord.X][coord.Y] = 2
+	move(coord)
 }
 
 func checkHorizontalScore(c coord) int {

@@ -106,13 +106,11 @@ func play(w http.ResponseWriter, r *http.Request) {
 	if isGameOver(t) {
 		println("Game Over")
 	}
-	current = (current + 1) % 2
 	if g.Mode == "solo" {
 		aiPlay()
 		if isGameOver(t) {
 			println("Game Over")
 		}
-		current = (current + 1) % 2
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
