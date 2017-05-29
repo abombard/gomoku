@@ -12,22 +12,33 @@ func aiPlay() {
 	move(coord)
 }
 
-type fn func(x, y int) bool
+type fn func(x, y int, tmp [19][19]int) bool
 
-func horizontalScore(me, him fn) int {
+func isEnemyTmp(x, y int, tmp [19][19]int) bool {
+	return !isEmptyTmp(x, y, tmp) && tmp[x][y] != current+1
+}
+
+func isMeTmp(x, y int, tmp [19][19]int) bool {
+	return !isEmptyTmp(x, y, tmp) && tmp[x][y] == current+1
+}
+func isEmptyTmp(x, y int, tmp [19][19]int) bool {
+	return tmp[x][y] == 0
+}
+
+func horizontalScore(me, him fn, tmp [19][19]int) int {
 	score := 0
 	finalScore := 0
 	for y := 0; y < HEIGHT; y++ {
 		for x := 0; isValidCoord(x, y); x++ {
 			tmpx := x
-			for ; me(tmpx, y); tmpx++ {
+			for ; me(tmpx, y, tmp); tmpx++ {
 				score++
 			}
 			if score != 0 {
 				tmpx = x
 				space := 0
 				spaceOk := false
-				for ; isValidCoord(tmpx, y) && (me(tmpx, y) || !him(tmpx, y)); tmpx-- {
+				for ; isValidCoord(tmpx, y) && (me(tmpx, y, tmp) || !him(tmpx, y, tmp)); tmpx-- {
 					space++
 					if space >= 5 {
 						spaceOk = true
@@ -37,7 +48,7 @@ func horizontalScore(me, him fn) int {
 				}
 				if !spaceOk {
 					tmpx = x + score
-					for ; isValidCoord(tmpx, y) && (me(tmpx, y) || !him(tmpx, y)); tmpx++ {
+					for ; isValidCoord(tmpx, y) && (me(tmpx, y, tmp) || !him(tmpx, y, tmp)); tmpx++ {
 						space++
 						if space+score >= 5 {
 							spaceOk = true
@@ -57,20 +68,20 @@ func horizontalScore(me, him fn) int {
 
 }
 
-func verticalScore(me, him fn) int {
+func verticalScore(me, him fn, tmp [19][19]int) int {
 	score := 0
 	finalScore := 0
 	for x := 0; x < HEIGHT; x++ {
 		for y := 0; isValidCoord(x, y); y++ {
 			tmpy := y
-			for ; me(x, tmpy); tmpy++ {
+			for ; me(x, tmpy, tmp); tmpy++ {
 				score++
 			}
 			if score != 0 {
 				tmpy = y
 				space := 0
 				spaceOk := false
-				for ; isValidCoord(x, tmpy) && (me(x, tmpy) || !him(x, tmpy)); tmpy-- {
+				for ; isValidCoord(x, tmpy) && (me(x, tmpy, tmp) || !him(x, tmpy, tmp)); tmpy-- {
 					space++
 					if space >= 5 {
 						spaceOk = true
@@ -80,7 +91,7 @@ func verticalScore(me, him fn) int {
 				}
 				if !spaceOk {
 					tmpy = y + score
-					for ; isValidCoord(x, tmpy) && (me(x, tmpy) || !him(x, tmpy)); tmpy++ {
+					for ; isValidCoord(x, tmpy) && (me(x, tmpy, tmp) || !him(x, tmpy, tmp)); tmpy++ {
 						space++
 						if space+score >= 5 {
 							spaceOk = true
@@ -112,10 +123,10 @@ func evaluate(c coord, ch chan resp) {
 	}
 	tmp[c.X][c.Y] = 2
 	finalScore := 0
-	finalScore += horizontalScore(isMe, isEnemy)
-	finalScore -= horizontalScore(isEnemy, isMe)
-	finalScore += verticalScore(isMe, isEnemy)
-	finalScore -= verticalScore(isEnemy, isMe)
+	finalScore += horizontalScore(isMeTmp, isEnemyTmp, tmp)
+	finalScore -= horizontalScore(isEnemyTmp, isMeTmp, tmp)
+	finalScore += verticalScore(isMeTmp, isEnemyTmp, tmp)
+	finalScore -= verticalScore(isEnemyTmp, isMeTmp, tmp)
 
 	ch <- resp{C: c, Score: finalScore}
 }
