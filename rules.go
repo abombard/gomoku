@@ -133,11 +133,13 @@ func canBeCaptured(x, y int) bool {
 		x2, y2 := x + p2[0], y + p2[1]
 		x3, y3 := x + p3[0], y + p3[1]
 		x4, y4 := x + p4[0], y + p4[1]
-		if IsValidCoord(x1, y2) && IsValidCoord(x2, y2) && IsValidCoord(x3, y3) {
-			if (isMe(x2, y2) && ((isFree(x1, y1) && isEnemy(x3, y3)) || (isEnemy(x1, y1) && isFree(x3, y3)))) ||
-			   (isMe(x3, y3) && ((isFree(x2, y2) && isEnemy(x4, y4)) || (isEnemy(x2, y2) && isFree(x4, y4)))) {
-				return true
-			}
+		if ((IsValidCoord(x1, y2) && IsValidCoord(x2, y2) && IsValidCoord(x3, y3) &&
+		     isMe(x2, y2) &&
+		   ((isFree(x1, y1) && isEnemy(x3, y3)) || (isEnemy(x1, y1) && isFree(x3, y3)))) ||
+		   (IsValidCoord(x2, y2) && IsValidCoord(x3, y3) && IsValidCoord(x4, y4) &&
+		    isMe(x3, y3) &&
+		   ((isFree(x2, y2) && isEnemy(x4, y4)) || (isEnemy(x2, y2) && isFree(x4, y4))))) {
+			return true
 		}
 	}
 	return false
@@ -147,6 +149,7 @@ func IsGameOver(c coord) bool {
 	x, y := c.X, c.Y
 
 	if canBeCaptured(x, y) {
+		println("New move can be captured")
 		return false
 	}
 

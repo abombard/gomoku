@@ -96,10 +96,13 @@ func play(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	Move(t)
+	current = (current + 1) % 2
 	if g.Mode == "solo" {
 		aiPlay()
-	} else if g.Mode == "multi" {
 		current = (current + 1) % 2
+	}
+	if IsGameOver(t) {
+		println("Game Over")
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
