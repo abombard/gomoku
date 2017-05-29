@@ -23,6 +23,33 @@ func isMe(x, y int) bool {
 	return !isEmpty(x, y) && g.Board[x][y] == current+1
 }
 
+func capture(x, y int, p int) {
+
+	checks := [8][3][2]int{
+		{{-1, -1}, {-2, -2}, {-3, -3}},
+		{{-1, 0}, {-2, 0}, {-3, 0}},
+		{{-1, 1}, {-2, 2}, {-3, 3}},
+		{{0, 1}, {0, 2}, {0, 3}},
+		{{1, 1}, {2, 2}, {3, 3}},
+		{{1, 0}, {2, 0}, {3, 0}},
+		{{1, -1}, {2, -2}, {3, -3}},
+		{{0, -1}, {0, -2}, {0, -3}},
+	}
+	for i := range checks {
+		p1, p2, p3 := checks[i][0], checks[i][1], checks[i][2]
+		x1, y1 := x+p1[0], y+p1[1]
+		x2, y2 := x+p2[0], y+p2[1]
+		x3, y3 := x+p3[0], y+p3[1]
+		if isValidCoord(x1, y1) && isValidCoord(x2, y2) && isValidCoord(x3, y3) {
+			if isEnemy(x1, y1) && isEnemy(x2, y2) && isMe(x3, y3) {
+				// Successfully captured
+				g.Board[x1][y1] = 0
+				g.Board[x2][y2] = 0
+			}
+		}
+	}
+}
+
 func introduceDoubleThree(x, y int) bool {
 
 	checks := [4][6][2]int{
@@ -109,7 +136,7 @@ func tryCapture(x, y int) {
 	}
 }
 
-func Move(c coord) {
+func move(c coord) {
 	err := isValidMove(c)
 	if err != nil {
 		return
