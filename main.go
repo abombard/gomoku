@@ -91,19 +91,28 @@ func play(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	defer r.Body.Close()
+	/*
+		if t.Player != players[current] {
+			http.Error(w, "Not your turn bitch", 400)
+			return
+		}
+	*/
 	err = isValidMove(t)
 	if err != nil {
 		http.Error(w, err.Error(), 400)
 		return
 	}
 	move(t)
+	if isGameOver(t) {
+		println("Game Over")
+	}
 	current = (current + 1) % 2
 	if g.Mode == "solo" {
 		aiPlay()
+		if isGameOver(t) {
+			println("Game Over")
+		}
 		current = (current + 1) % 2
-	}
-	if isGameOver(t) {
-		println("Game Over")
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
