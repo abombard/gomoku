@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 const (
 	WIDTH  = 19
 	HEIGHT = 19
@@ -48,7 +50,7 @@ func capture(x, y int, p int) {
 	}
 }
 
-func introduceDoubleThree(x, y int, p int) bool {
+func introduceDoubleThree(x, y int) bool {
 
 	checks := [4][6][2]int{
 		{{-3, -3}, {-2, -2}, {-1, -1}, {1, 1}, {2, 2}, {3, 3}},
@@ -92,7 +94,56 @@ func introduceDoubleThree(x, y int, p int) bool {
 		}
 	}
 
-	return threeCount < 2
+	return threeCount > 1
+}
+
+func isValidMove(c coord) error {
+	x, y := c.X, c.Y
+	if !isValidCoord(x, y) {
+		return fmt.Errorf("Invalid coordonate")
+	} else if !isFree(x, y) {
+		return fmt.Errorf("Case already taken")
+	} else if introduceDoubleThree(x, y) {
+		return fmt.Errorf("Illegal move")
+	}
+	return nil
+}
+
+func tryCapture(x, y int) {
+
+	checks := [8][3][2]int{
+		{{-1, -1}, {-2, -2}, {-3, -3}},
+		{{-1, 0}, {-2, 0}, {-3, 0}},
+		{{-1, 1}, {-2, 2}, {-3, 3}},
+		{{0, 1}, {0, 2}, {0, 3}},
+		{{1, 1}, {2, 2}, {3, 3}},
+		{{1, 0}, {2, 0}, {3, 0}},
+		{{1, -1}, {2, -2}, {3, -3}},
+		{{0, -1}, {0, -2}, {0, -3}},
+	}
+	for i := range checks {
+		p1, p2, p3 := checks[i][0], checks[i][1], checks[i][2]
+		x1, y1 := x+p1[0], y+p1[1]
+		x2, y2 := x+p2[0], y+p2[1]
+		x3, y3 := x+p3[0], y+p3[1]
+		if isValidCoord(x1, y1) && isValidCoord(x2, y2) && isValidCoord(x3, y3) {
+			if isEnemy(x1, y1) && isEnemy(x2, y2) && isMe(x3, y3) {
+				// Successfully captured
+				g.Board[x1][y1] = 0
+				g.Board[x2][y2] = 0
+			}
+		}
+	}
+}
+
+func Move(c coord) {
+	err := isValidMove(c)
+	if err != nil {
+		return
+	}
+	x, y := c.X, c.Y
+	tryCapture(x, y)
+	g.Board[x][y] = current + 1
 }
 
 func canBeCaptured(x, y int) bool {
@@ -119,9 +170,11 @@ func canBeCaptured(x, y int) bool {
 	return false
 }
 
-func isGameOver(x, y int) bool {
+func IsGameOver(c coord) bool {
+	x, y := c.X, c.Y
 
 	if canBeCaptured(x, y) {
+		println("New move can be captured")
 		return false
 	}
 
