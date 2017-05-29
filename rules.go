@@ -70,7 +70,7 @@ func introduceDoubleThree(x, y int) bool {
 					break
 				}
 			}
-			x1, y1 := checks[i][j][0], checks[i][j][1]
+			x1, y1 := x+checks[i][j][0], y+checks[i][j][1]
 			if isValidCoord(x1, y1) {
 				if isMe(x1, y1) {
 					blank = 0
@@ -144,6 +144,7 @@ func move(c coord) {
 	x, y := c.X, c.Y
 	tryCapture(x, y)
 	g.Board[x][y] = current + 1
+	current = (current + 1) % 2
 }
 
 func canBeCaptured(x, y int) bool {
