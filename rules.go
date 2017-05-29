@@ -70,7 +70,7 @@ func introduceDoubleThree(x, y int) bool {
 					break
 				}
 			}
-			x1, y1 := checks[i][j][0], checks[i][j][1]
+			x1, y1 := x+checks[i][j][0], y+checks[i][j][1]
 			if isValidCoord(x1, y1) {
 				if isMe(x1, y1) {
 					blank = 0
