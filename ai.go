@@ -132,7 +132,9 @@ func checkDiagonalScore(c coord) int {
 				ennemyScore = 0
 				score += 1
 			}
+			y--
 		}
+		x--
 	}
 	if ennemyScore > best {
 		best = ennemyScore
@@ -143,8 +145,6 @@ func checkDiagonalScore(c coord) int {
 	ennemyScore = 0
 	y = 4
 	x = -4
-	ennemyScore = 0
-	score = 0
 	for x < 0 {
 		for y > 0 {
 			for ; x < 0 && y > 0 && isValidCoord(c.X+x, c.Y+y) && isMe(c.X+x, c.Y+y); x, y = x+1, y-1 {
