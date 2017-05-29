@@ -11,183 +11,178 @@ func aiPlay() {
 	g.Board[coord.X][coord.Y] = 2
 }
 
+func max(a, b int) int {
+	if a > b {
+		return a
+	}
+	return b
+}
+
 func checkHorizontalScore(c coord) int {
 	score := 0
-	x := -4
 	ennemyScore := 0
-	best := 0
-	for ; x < 0; x++ {
-		for ; x < 0 && isValidCoord(c.X+x, c.Y) && isMe(c.X+x, c.Y); x++ {
+	bestRightScore := 0
+	bestLeftScore := 0
+	bestRightEnnemyScore := 0
+	bestLeftEnnemyScore := 0
+	for x := -4; x < 0 && isValidCoord(c.X+x, c.Y); x++ {
+		if isEnemy(c.X+x, c.Y) {
+			ennemyScore += 2
 			score = 0
-			ennemyScore += 1
-		}
-		for ; x < 0 && isValidCoord(c.X+x, c.Y) && isEnemy(c.X+x, c.Y); x++ {
+		} else if isMe(c.X+x, c.Y) {
+			score += 2
 			ennemyScore = 0
-			score += 1
 		}
 	}
-	if score > ennemyScore {
-		best = score
-	} else {
-		best = ennemyScore
-	}
-	x = 4
+	bestLeftScore = score
+	bestLeftEnnemyScore = ennemyScore
 	score = 0
 	ennemyScore = 0
-	for ; x > 0; x-- {
-		for ; x > 0 && isValidCoord(c.X+x, c.Y) && isMe(c.X+x, c.Y); x-- {
+	for x := 4; x > 0 && isValidCoord(c.X+x, c.Y); x-- {
+		if isEnemy(c.X+x, c.Y) {
+			ennemyScore += 2
 			score = 0
-			ennemyScore += 1
-		}
-		for ; x > 0 && isValidCoord(c.X+x, c.Y) && isEnemy(c.X+x, c.Y); x-- {
+		} else if isMe(c.X+x, c.Y) {
+			score += 2
 			ennemyScore = 0
-			score += 1
 		}
 	}
-	if ennemyScore > best {
-		return ennemyScore
-	} else if score > best {
-		return score
+	bestRightScore = score
+	bestRightEnnemyScore = ennemyScore
+	if bestLeftScore > bestLeftEnnemyScore && bestRightScore > bestRightEnnemyScore {
+		return bestLeftScore + bestRightScore
 	}
-	return best
+	if bestLeftScore < bestLeftEnnemyScore && bestRightScore < bestRightEnnemyScore {
+		return bestLeftEnnemyScore + bestRightEnnemyScore
+	}
+	maxScore := max(bestLeftScore, bestRightScore)
+	maxEnnemyScore := max(bestLeftEnnemyScore, bestRightEnnemyScore)
+	return max(maxScore, maxEnnemyScore)
 }
 
 func checkVerticalScore(c coord) int {
 	score := 0
-	y := -4
 	ennemyScore := 0
-	best := 0
-	for ; y < 0; y++ {
-		for ; y < 0 && isValidCoord(c.X, c.Y+y) && isMe(c.X, c.Y+y); y++ {
+	bestRightScore := 0
+	bestLeftScore := 0
+	bestRightEnnemyScore := 0
+	bestLeftEnnemyScore := 0
+	for y := -4; y < 0 && isValidCoord(c.X, c.Y+y); y++ {
+		if isEnemy(c.X, c.Y+y) {
+			ennemyScore += 2
 			score = 0
-			ennemyScore += 1
-		}
-		for ; y < 0 && isValidCoord(c.X, c.Y+y) && isEnemy(c.X, c.Y+y); y++ {
+		} else if isMe(c.X, c.Y+y) {
+			score += 2
 			ennemyScore = 0
-			score += 1
 		}
 	}
-	if score > ennemyScore {
-		best = score
-	} else {
-		best = ennemyScore
-	}
+	bestLeftScore = score
+	bestLeftEnnemyScore = ennemyScore
 	score = 0
 	ennemyScore = 0
-	y = 4
-	for ; y > 0; y-- {
-		for ; y > 0 && isValidCoord(c.X, c.Y+y) && isMe(c.X, c.Y+y); y-- {
+	for y := 4; y > 0 && isValidCoord(c.X, c.Y+y); y-- {
+		if isEnemy(c.X, c.Y+y) {
+			ennemyScore += 2
 			score = 0
-			ennemyScore += 1
-		}
-		for ; y > 0 && isValidCoord(c.X, c.Y+y) && isEnemy(c.X, c.Y+y); y-- {
+		} else if isMe(c.X, c.Y+y) {
+			score += 2
 			ennemyScore = 0
-			score += 1
 		}
 	}
-	if ennemyScore > best {
-		return ennemyScore
-	} else if score > best {
-		return score
+	bestRightScore = score
+	bestRightEnnemyScore = ennemyScore
+	if bestLeftScore > bestLeftEnnemyScore && bestRightScore > bestRightEnnemyScore {
+		return bestLeftScore + bestRightScore
 	}
-	return best
+	if bestLeftScore < bestLeftEnnemyScore && bestRightScore < bestRightEnnemyScore {
+		return bestLeftEnnemyScore + bestRightEnnemyScore
+	}
+	maxScore := max(bestLeftScore, bestRightScore)
+	maxEnnemyScore := max(bestLeftEnnemyScore, bestRightEnnemyScore)
+	return max(maxScore, maxEnnemyScore)
 }
 
 func checkDiagonalScore(c coord) int {
 	score := 0
-	y := -4
-	x := -4
 	ennemyScore := 0
-	best := 0
-	for x < 0 {
-		for y < 0 {
-			for ; x < 0 && y < 0 && isValidCoord(c.X+x, c.Y+y) && isMe(c.X+x, c.Y+y); x, y = x+1, y+1 {
-				score = 0
-				ennemyScore += 1
-			}
-			for ; x < 0 && y < 0 && isValidCoord(c.X+x, c.Y+y) && isEnemy(c.X+x, c.Y+y); x, y = x+1, y+1 {
-				ennemyScore = 0
-				score += 1
-			}
-			y++
+	bestRightScore := 0
+	bestLeftScore := 0
+	bestRightEnnemyScore := 0
+	bestLeftEnnemyScore := 0
+	for x, y := -4, -4; y < 0 && x < 0 && isValidCoord(c.X+x, c.Y+y); x, y = x+1, y+1 {
+		if isEnemy(c.X+x, c.Y+y) {
+			ennemyScore += 2
+			score = 0
+		} else if isMe(c.X+x, c.Y+y) {
+			score += 2
+			ennemyScore = 0
 		}
-		x++
 	}
-	if score > ennemyScore {
-		best = score
-	} else {
-		best = ennemyScore
-	}
+	bestLeftScore = score
+	bestLeftEnnemyScore = ennemyScore
 	score = 0
 	ennemyScore = 0
-	y = 4
-	x = 4
-	for x > 0 {
-		for y > 0 {
-			for ; x > 0 && y > 0 && isValidCoord(c.X+x, c.Y+y) && isMe(c.X+x, c.Y+y); x, y = x-1, y-1 {
-				score = 0
-				ennemyScore += 1
-			}
-			for ; x > 0 && y > 0 && isValidCoord(c.X+x, c.Y+y) && isEnemy(c.X+x, c.Y+y); x, y = x-1, y-1 {
-				ennemyScore = 0
-				score += 1
-			}
-			y--
+	for x, y := 4, 4; y > 0 && x > 0 && isValidCoord(c.X+x, c.Y+y); x, y = x-1, y-1 {
+		if isEnemy(c.X+x, c.Y+y) {
+			ennemyScore += 2
+			score = 0
+		} else if isMe(c.X+x, c.Y+y) {
+			score += 2
+			ennemyScore = 0
 		}
-		x--
 	}
-	if ennemyScore > best {
-		best = ennemyScore
-	} else if score > best {
-		best = score
+	bestRightScore = score
+	bestRightEnnemyScore = ennemyScore
+	if bestLeftScore > bestLeftEnnemyScore && bestRightScore > bestRightEnnemyScore {
+		return bestLeftScore + bestRightScore
 	}
+	if bestLeftScore < bestLeftEnnemyScore && bestRightScore < bestRightEnnemyScore {
+		return bestLeftEnnemyScore + bestRightEnnemyScore
+	}
+	maxScore := max(bestLeftScore, bestRightScore)
+	maxEnnemyScore := max(bestLeftEnnemyScore, bestRightEnnemyScore)
+	return max(maxScore, maxEnnemyScore)
+}
+func checkDiagonalScore2(c coord) int {
+	score := 0
+	ennemyScore := 0
+	bestRightScore := 0
+	bestLeftScore := 0
+	bestRightEnnemyScore := 0
+	bestLeftEnnemyScore := 0
+	for x, y := -4, 4; y > 0 && x < 0 && isValidCoord(c.X+x, c.Y+y); x, y = x+1, y-1 {
+		if isEnemy(c.X+x, c.Y+y) {
+			ennemyScore += 2
+			score = 0
+		} else if isMe(c.X+x, c.Y+y) {
+			score += 2
+			ennemyScore = 0
+		}
+	}
+	bestLeftScore = score
+	bestLeftEnnemyScore = ennemyScore
 	score = 0
 	ennemyScore = 0
-	y = 4
-	x = -4
-	for x < 0 {
-		for y > 0 {
-			for ; x < 0 && y > 0 && isValidCoord(c.X+x, c.Y+y) && isMe(c.X+x, c.Y+y); x, y = x+1, y-1 {
-				score = 0
-				ennemyScore += 1
-			}
-			for ; x < 0 && y > 0 && isValidCoord(c.X+x, c.Y+y) && isEnemy(c.X+x, c.Y+y); x, y = x+1, y-1 {
-				ennemyScore = 0
-				score += 1
-			}
-			y--
+	for x, y := 4, -4; y < 0 && x > 0 && isValidCoord(c.X+x, c.Y+y); x, y = x-1, y+1 {
+		if isEnemy(c.X+x, c.Y+y) {
+			ennemyScore += 2
+			score = 0
+		} else if isMe(c.X+x, c.Y+y) {
+			score += 2
+			ennemyScore = 0
 		}
-		x++
 	}
-	if score > ennemyScore {
-		best = score
-	} else {
-		best = ennemyScore
+	bestRightScore = score
+	bestRightEnnemyScore = ennemyScore
+	if bestLeftScore > bestLeftEnnemyScore && bestRightScore > bestRightEnnemyScore {
+		return bestLeftScore + bestRightScore
 	}
-	score = 0
-	ennemyScore = 0
-	y = -4
-	x = 4
-	for x > 0 {
-		for y < 0 {
-			for ; x > 0 && y < 0 && isValidCoord(c.X+x, c.Y+y) && isMe(c.X+x, c.Y+y); x, y = x-1, y+1 {
-				score = 0
-				ennemyScore += 1
-			}
-			for ; x > 0 && y < 0 && isValidCoord(c.X+x, c.Y+y) && isEnemy(c.X+x, c.Y+y); x, y = x-1, y+1 {
-				ennemyScore = 0
-				score += 1
-			}
-			y++
-		}
-		x--
+	if bestLeftScore < bestLeftEnnemyScore && bestRightScore < bestRightEnnemyScore {
+		return bestLeftEnnemyScore + bestRightEnnemyScore
 	}
-	if ennemyScore > best {
-		best = ennemyScore
-	} else if score > best {
-		best = score
-	}
-	return best
+	maxScore := max(bestLeftScore, bestRightScore)
+	maxEnnemyScore := max(bestLeftEnnemyScore, bestRightEnnemyScore)
+	return max(maxScore, maxEnnemyScore)
 }
 
 func heuristic(coords []coord) coord {
