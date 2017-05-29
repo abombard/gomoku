@@ -200,6 +200,11 @@ func heuristic(coords []coord) coord {
 			currentScore = tmp
 		}
 		log.Println("Diag score: ", tmp)
+		tmp = checkDiagonalScore2(coord)
+		if tmp > currentScore {
+			currentScore = tmp
+		}
+		log.Println("Diag2 score: ", tmp)
 		if currentScore > best {
 			best = currentScore
 			bestCoord = coord
