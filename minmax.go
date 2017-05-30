@@ -36,7 +36,7 @@ func horizontalScoreNew(board [][]int, player int) int {
 	for y := 0; y < HEIGHT; y++ {
 		for x := 0; isValidCoord(x, y); x++ {
 			tmpx := x
-			for ; isMeNew(tmpx, y, board, player); tmpx++ {
+			for ; isValidCoord(tmpx, y) && isMeNew(tmpx, y, board, player); tmpx++ {
 				score++
 			}
 			if score != 0 {
@@ -85,7 +85,7 @@ func verticalScoreNew(board [][]int, player int) int {
 	for x := 0; x < HEIGHT; x++ {
 		for y := 0; isValidCoord(x, y); y++ {
 			tmpy := y
-			for ; isMeNew(x, tmpy, board, player); tmpy++ {
+			for ; isValidCoord(x, tmpy) && isMeNew(x, tmpy, board, player); tmpy++ {
 				score++
 			}
 			if score != 0 {
