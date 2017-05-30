@@ -13,8 +13,13 @@ import (
 	"github.com/gorilla/mux"
 )
 
+const (
+	WIDTH  = 19
+	HEIGHT = 19
+)
+
 type Gomoku struct {
-	Board [19][19]int
+	Board [HEIGHT][WIDTH]int
 	Mode  string
 }
 

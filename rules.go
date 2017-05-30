@@ -2,11 +2,6 @@ package main
 
 import "fmt"
 
-const (
-	WIDTH  = 19
-	HEIGHT = 19
-)
-
 func isValidCoord(x, y int) bool {
 	return x >= 0 && x < HEIGHT && y >= 0 && y < WIDTH
 }
