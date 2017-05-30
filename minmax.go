@@ -53,8 +53,7 @@ func assignScore(sb [][]int, x, y int, me bool, checks [][2]int) int {
 		if isValidCoord(x1, y1) {
 			if me && sb[x1][y1] > 0 {
 				score += sb[x1][y1] + 1
-			}
-			if !me && sb[x1][y1] < 0 {
+			} else if !me && sb[x1][y1] < 0 {
 				score += -sb[x1][y1]
 			}
 		}
