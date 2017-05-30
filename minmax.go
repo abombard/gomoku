@@ -2,12 +2,14 @@ package main
 
 import "log"
 
+const MINMAX_ITER = 10
+
 func getPossibleMoveList(b [][]int) []coord {
 	var coords []coord
 
-	for x := range b {
-		for y := range b[0] {
-			if isPawnNearby(x, y) == true && b[x][y] == 0 {
+	for x := 0; x < HEIGHT; x++ {
+		for y := 0; y < WIDTH; y++ {
+			if isPawnNearby(b, x, y) == true && b[x][y] == 0 {
 				coords = append(coords, coord{X: x, Y: y})
 			}
 		}
@@ -15,8 +17,6 @@ func getPossibleMoveList(b [][]int) []coord {
 
 	return coords
 }
-
-type fnptr func(x, y int, board [][]int, p int) bool
 
 func isEmptyNew(x, y int, board [][]int, p int) bool {
 	return board[x][y] == 0
@@ -30,111 +30,81 @@ func isEnemyNew(x, y int, board [][]int, player int) bool {
 	return !isEmptyNew(x, y, board, player) && board[x][y] != player+1
 }
 
-func horizontalScoreNew(board [][]int, player int) int {
+func addScore(sb [][]int, x, y int, checks [][2]int) int {
+
 	score := 0
-	finalScore := 0
-	for y := 0; y < HEIGHT; y++ {
-		for x := 0; isValidCoord(x, y); x++ {
-			tmpx := x
-			for ; isMeNew(tmpx, y, board, player); tmpx++ {
-				score++
-			}
-			if score != 0 {
-				tmpx = x
-				space := 0
-				spaceOk := false
-				for ; isValidCoord(tmpx, y) && (isMeNew(tmpx, y, board, player) || !isEnemyNew(tmpx, y, board, player)); tmpx-- {
-					space++
-					if space+score >= 5 {
-						spaceOk = true
-						break
-					}
 
-				}
-				if !spaceOk {
-					tmpx = x + score
-					for ; isValidCoord(tmpx, y) && (isMeNew(tmpx, y, board, player) || !isEnemyNew(tmpx, y, board, player)); tmpx++ {
-						space++
-						if space+score >= 5 {
-							spaceOk = true
-							break
-						}
-
-					}
-				}
-				if spaceOk {
-					finalScore += score
-					if score == 4 {
-						if player == current {
-							finalScore += 100
-						} else {
-							finalScore -= 200
-						}
-					}
-				}
-				score = 0
-			}
+	for i := range checks {
+		x1, y1 := x+checks[i][0], y+checks[i][1]
+		if isValidCoord(x1, y1) {
+			score += sb[x1][y1] + 1
 		}
 	}
-	return finalScore
+
+	return score
 }
 
-func verticalScoreNew(board [][]int, player int) int {
+func assignScore(sb [][]int, x, y int, me bool, checks [][2]int) int {
+
 	score := 0
-	finalScore := 0
-	for x := 0; x < HEIGHT; x++ {
-		for y := 0; isValidCoord(x, y); y++ {
-			tmpy := y
-			for ; isMeNew(x, tmpy, board, player); tmpy++ {
-				score++
+
+	for i := range checks {
+		x1, y1 := x+checks[i][0], y+checks[i][1]
+		if isValidCoord(x1, y1) {
+			if me && sb[x1][y1] > 0 {
+				score += sb[x1][y1] + 1
 			}
-			if score != 0 {
-				tmpy = y
-				space := 0
-				spaceOk := false
-				for ; isValidCoord(x, tmpy) && (isMeNew(x, tmpy, board, player) || !isEnemyNew(x, tmpy, board, player)); tmpy-- {
-					space++
-					if space+score >= 5 {
-						spaceOk = true
-						break
-					}
-
-				}
-				if !spaceOk {
-					tmpy = y + score
-					for ; isValidCoord(x, tmpy) && (isMeNew(x, tmpy, board, player) || !isEnemyNew(x, tmpy, board, player)); tmpy++ {
-						space++
-						if space+score >= 5 {
-							spaceOk = true
-							break
-						}
-
-					}
-				}
-				if spaceOk {
-					finalScore += score
-					if score == 4 {
-						if player == current {
-							finalScore += 100
-						} else {
-							finalScore -= 200
-						}
-					}
-				}
-				score = 0
+			if !me && sb[x1][y1] < 0 {
+				score += -sb[x1][y1]
 			}
 		}
 	}
-	return finalScore
+
+	return score
 }
 
 func heuristic(board [][]int, player int) int {
 
+	// heuristic score
 	score := 0
-	score += horizontalScoreNew(board, player)
-	score += horizontalScoreNew(board, (player+1)%2)
-	score += verticalScoreNew(board, player)
-	score += verticalScoreNew(board, (player+1)%2)
+
+	// score board
+	sb := make([][]int, HEIGHT)
+	for x := range board {
+		sb[x] = make([]int, WIDTH)
+	}
+
+	// checks from left
+	checksLeft := [][2]int{{-1, 0}, {-1, -1}, {0, -1}, {1, -1}}
+	checksRight := [][2]int{{1, 0}, {1, 1}, {-1, 0}, {-1, 1}}
+
+	// left to right
+	for x := range board {
+		for y := range board[x] {
+			if isEmptyNew(x, y, board, player) {
+				sb[x][y] = 0
+				score += addScore(sb, x, y, checksLeft)
+			} else {
+				sb[x][y] = assignScore(sb, x, y,
+					isMeNew(x, y, board, player),
+					checksLeft)
+			}
+		}
+	}
+
+	// right to left
+	for x := range board {
+		for y := range board[x] {
+			if isEmptyNew(x, y, board, player) {
+				sb[x][y] = 0
+				score += addScore(sb, x, y, checksRight)
+			} else {
+				sb[x][y] = assignScore(sb, x, y,
+					isMeNew(x, y, board, player),
+					checksRight)
+			}
+		}
+	}
 
 	return score
 }
@@ -168,7 +138,7 @@ func recminmax(board [][]int, pt coord, player int, iter int, ch chan step) step
 
 	board[pt.X][pt.Y] = player + 1
 
-	if iter == 3 {
+	if iter == MINMAX_ITER {
 		score := heuristic(board, player)
 		board[pt.X][pt.Y] = 0
 		return step{pt, score}
@@ -210,16 +180,19 @@ func minmax(board [HEIGHT][WIDTH]int, player int) coord {
 	ch := make(chan step, len(nextMoves))
 
 	for i, _ := range nextMoves {
-		pt := nextMoves[i]
 
 		// create a new slice for each go routine
-		newB := make([][]int, HEIGHT)
+		b := make([][]int, HEIGHT)
 		for i := 0; i < HEIGHT; i++ {
-			newB[i] = make([]int, WIDTH)
-			copy(newB, b)
+			b[i] = make([]int, WIDTH)
+			for j := 0; j < WIDTH; j++ {
+				b[i][j] = g.Board[i][j]
+			}
 		}
 
-		go recminmax(newB, pt, player, 0, ch)
+		log.Println("=== send newB to go routine ===")
+		log.Println(b)
+		go recminmax(b, nextMoves[i], player, 0, ch)
 	}
 
 	res := make([]step, 0)

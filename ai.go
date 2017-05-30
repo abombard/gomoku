@@ -168,14 +168,14 @@ func maxi(coords []coord) coord {
 	return coord{X: ret.C.X, Y: ret.C.Y}
 }
 
-func isPawnNearby(xtarg, ytarg int) bool {
+func isPawnNearby(b [][]int, xtarg, ytarg int) bool {
 	x := -1
 	y := -1
 	for ; x < 2; x++ {
 		y = -1
 		for ; y < 2; y++ {
 			if xtarg+x >= 0 && xtarg+x < 19 && ytarg+y >= 0 && ytarg+y < 19 {
-				if g.Board[xtarg+x][ytarg+y] != 0 {
+				if b[xtarg+x][ytarg+y] != 0 {
 					return true
 				}
 			}
@@ -184,18 +184,4 @@ func isPawnNearby(xtarg, ytarg int) bool {
 	}
 	return false
 
-}
-
-func getPossiblePlays() []coord {
-	var coords []coord
-
-	for x := range g.Board {
-		for y := range g.Board {
-			if isPawnNearby(x, y) == true && g.Board[x][y] == 0 {
-				coords = append(coords, coord{X: x, Y: y})
-			}
-		}
-	}
-
-	return coords
 }
