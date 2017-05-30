@@ -132,9 +132,9 @@ func heuristic(board [][]int, player int) int {
 
 	score := 0
 	score += horizontalScoreNew(board, player)
-	score += horizontalScoreNew(board, player)
+	score += horizontalScoreNew(board, (player+1)%2)
 	score += verticalScoreNew(board, player)
-	score += verticalScoreNew(board, player)
+	score += verticalScoreNew(board, (player+1)%2)
 
 	return score
 }
