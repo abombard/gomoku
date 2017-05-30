@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"flag"
-	"io"
 	"log"
 	"net/http"
 	"os"
@@ -31,10 +30,6 @@ type coord struct {
 	X      int
 	Y      int
 	Player string
-}
-
-func hello(w http.ResponseWriter, r *http.Request) {
-	io.WriteString(w, "GOMOKU")
 }
 
 // Init

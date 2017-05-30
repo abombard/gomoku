@@ -3,8 +3,9 @@ package main
 import "log"
 
 func aiPlay() {
-	coords := getPossiblePlays()
-	coord := maxi(coords)
+	coord := minmax(g.Board, current)
+	//coords := getPossiblePlays()
+	//coord := maxi(coords)
 	err := isValidMove(coord)
 	if err != nil {
 		println(err)
