@@ -169,12 +169,9 @@ func maxi(coords []coord) coord {
 }
 
 func isPawnNearby(b [][]int, xtarg, ytarg int) bool {
-	x := -1
-	y := -1
-	for ; x < 2; x++ {
-		y = -1
-		for ; y < 2; y++ {
-			if xtarg+x >= 0 && xtarg+x < 19 && ytarg+y >= 0 && ytarg+y < 19 {
+	for x := -1; x < 2; x++ {
+		for y := -1; y < 2; y++ {
+			if isValidCoord(xtarg+x, ytarg+y) {
 				if b[xtarg+x][ytarg+y] != 0 {
 					return true
 				}

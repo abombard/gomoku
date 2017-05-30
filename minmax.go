@@ -62,52 +62,6 @@ func assignScore(sb [][]int, x, y int, me bool, checks [][2]int) int {
 	return score
 }
 
-func heuristic(board [][]int, player int) int {
-
-	// heuristic score
-	score := 0
-
-	// score board
-	sb := make([][]int, HEIGHT)
-	for x := range board {
-		sb[x] = make([]int, WIDTH)
-	}
-
-	// checks from left
-	checksLeft := [][2]int{{-1, 0}, {-1, -1}, {0, -1}, {1, -1}}
-	checksRight := [][2]int{{1, 0}, {1, 1}, {-1, 0}, {-1, 1}}
-
-	// left to right
-	for x := range board {
-		for y := range board[x] {
-			if isEmptyNew(x, y, board, player) {
-				sb[x][y] = 0
-				score += addScore(sb, x, y, checksLeft)
-			} else {
-				sb[x][y] = assignScore(sb, x, y,
-					isMeNew(x, y, board, player),
-					checksLeft)
-			}
-		}
-	}
-
-	// right to left
-	for x := range board {
-		for y := range board[x] {
-			if isEmptyNew(x, y, board, player) {
-				sb[x][y] = 0
-				score += addScore(sb, x, y, checksRight)
-			} else {
-				sb[x][y] = assignScore(sb, x, y,
-					isMeNew(x, y, board, player),
-					checksRight)
-			}
-		}
-	}
-
-	return score
-}
-
 type step struct {
 	coord coord
 	score int
@@ -133,7 +87,7 @@ func max(scores []step) step {
 	return ret
 }
 
-func recminmax(board [][]int, pt coord, player int, iter int, ch chan step) step {
+func recminmax(board [][]int, pt coord, player int, iter int) step {
 
 	board[pt.X][pt.Y] = player + 1
 
@@ -144,10 +98,11 @@ func recminmax(board [][]int, pt coord, player int, iter int, ch chan step) step
 	}
 
 	next := getPossibleMoveList(board)
+	log.Println(next)
 
 	var scores []step
 	for i := range next {
-		s := recminmax(board, next[i], (player+1)%2, iter+1, ch)
+		s := recminmax(board, next[i], (player+1)%2, iter+1)
 		scores = append(scores, step{coord: pt, score: s.score})
 	}
 
@@ -160,9 +115,12 @@ func recminmax(board [][]int, pt coord, player int, iter int, ch chan step) step
 
 	board[pt.X][pt.Y] = 0
 
-	ch <- ret
-
 	return ret
+}
+
+func minmaxRoutine(board [][]int, pt coord, player int, ch chan step) {
+	ret := recminmax(board, pt, player, 0)
+	ch <- ret
 }
 
 func minmax(board [HEIGHT][WIDTH]int, player int) coord {
@@ -178,7 +136,7 @@ func minmax(board [HEIGHT][WIDTH]int, player int) coord {
 	nextMoves := getPossibleMoveList(b)
 	ch := make(chan step, len(nextMoves))
 
-	for i, _ := range nextMoves {
+	for x := 0; x < len(nextMoves); x++ {
 
 		// create a new slice for each go routine
 		b := make([][]int, HEIGHT)
@@ -189,9 +147,7 @@ func minmax(board [HEIGHT][WIDTH]int, player int) coord {
 			}
 		}
 
-		log.Println("=== send newB to go routine ===")
-		log.Println(b)
-		go recminmax(b, nextMoves[i], player, 0, ch)
+		go minmaxRoutine(b, nextMoves[x], player, ch)
 	}
 
 	res := make([]step, 0)
