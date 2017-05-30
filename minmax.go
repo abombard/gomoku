@@ -164,7 +164,7 @@ func max(scores []step) step {
 	return ret
 }
 
-func recminmax(board [][]int, pt coord, player int, iter int) step {
+func recminmax(board [][]int, pt coord, player int, iter int, ch chan step) step {
 
 	board[pt.X][pt.Y] = player + 1
 
@@ -178,7 +178,7 @@ func recminmax(board [][]int, pt coord, player int, iter int) step {
 
 	var scores []step
 	for i := range next {
-		s := recminmax(board, next[i], (player+1)%2, iter+1)
+		s := recminmax(board, next[i], (player+1)%2, iter+1, ch)
 		scores = append(scores, step{coord: pt, score: s.score})
 	}
 
@@ -190,6 +190,8 @@ func recminmax(board [][]int, pt coord, player int, iter int) step {
 	}
 
 	board[pt.X][pt.Y] = 0
+
+	ch <- ret
 
 	return ret
 }
@@ -205,11 +207,24 @@ func minmax(board [HEIGHT][WIDTH]int, player int) coord {
 	}
 
 	nextMoves := getPossibleMoveList(b)
+	ch := make(chan step, len(nextMoves))
 
-	res := make([]step, 0)
 	for i, _ := range nextMoves {
 		pt := nextMoves[i]
-		tmp := recminmax(b, pt, player, 0)
+
+		// create a new slice for each go routine
+		newB := make([][]int, HEIGHT)
+		for i := 0; i < HEIGHT; i++ {
+			newB[i] = make([]int, WIDTH)
+			copy(newB, b)
+		}
+
+		go recminmax(newB, pt, player, 0, ch)
+	}
+
+	res := make([]step, 0)
+	for i := 0; i < len(nextMoves); i++ {
+		tmp := <-ch
 		res = append(res, tmp)
 		log.Println(res)
 	}
