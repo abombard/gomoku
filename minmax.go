@@ -2,7 +2,7 @@ package main
 
 import "log"
 
-const MINMAX_ITER = 10
+const MINMAX_ITER = 3
 
 func getPossibleMoveList(b [][]int) []coord {
 	var coords []coord
@@ -53,8 +53,6 @@ func assignScore(sb [][]int, x, y int, me bool, checks [][2]int) int {
 		if isValidCoord(x1, y1) {
 			if me && sb[x1][y1] > 0 {
 				score += sb[x1][y1] + 1
-			} else if !me && sb[x1][y1] < 0 {
-				score += -sb[x1][y1]
 			}
 		}
 	}
@@ -98,7 +96,6 @@ func recminmax(board [][]int, pt coord, player int, iter int) step {
 	}
 
 	next := getPossibleMoveList(board)
-	log.Println(next)
 
 	var scores []step
 	for i := range next {
@@ -107,10 +104,10 @@ func recminmax(board [][]int, pt coord, player int, iter int) step {
 	}
 
 	var ret step
-	if player == current {
-		ret = min(scores)
-	} else {
+	if iter%2 == 0 {
 		ret = max(scores)
+	} else {
+		ret = min(scores)
 	}
 
 	board[pt.X][pt.Y] = 0
@@ -157,7 +154,7 @@ func minmax(board [HEIGHT][WIDTH]int, player int) coord {
 		log.Println(res)
 	}
 
-	ret := max(res)
+	ret := min(res)
 
 	return ret.coord
 }
