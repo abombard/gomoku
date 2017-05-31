@@ -43,6 +43,9 @@ func getScore(board [][]int, player int) int {
 					}
 
 					horSpace++
+					if horSpace > 5 {
+						break
+					}
 				}
 				stop = false
 				tmpx = x - 1
@@ -55,6 +58,9 @@ func getScore(board [][]int, player int) int {
 					}
 
 					horSpace++
+					if horSpace > 5 {
+						break
+					}
 				}
 				stop = false
 				tmpx = x
@@ -68,6 +74,9 @@ func getScore(board [][]int, player int) int {
 						stop = true
 					}
 					verSpace++
+					if verSpace > 5 {
+						break
+					}
 				}
 				stop = false
 				tmpy = y - 1
@@ -80,6 +89,9 @@ func getScore(board [][]int, player int) int {
 					}
 
 					verSpace++
+					if verSpace > 5 {
+						break
+					}
 				}
 				stop = false
 				b = 1
@@ -94,6 +106,9 @@ func getScore(board [][]int, player int) int {
 					}
 
 					diagSpace1++
+					if diagSpace1 > 5 {
+						break
+					}
 				}
 				stop = false
 				tmpx = x + 1
@@ -107,6 +122,9 @@ func getScore(board [][]int, player int) int {
 					}
 
 					diagSpace1++
+					if diagSpace1 > 5 {
+						break
+					}
 				}
 				stop = false
 				b = 1
@@ -121,6 +139,9 @@ func getScore(board [][]int, player int) int {
 					}
 
 					diagSpace2++
+					if diagSpace2 > 5 {
+						break
+					}
 				}
 				stop = false
 				tmpx = x - 1
@@ -134,6 +155,9 @@ func getScore(board [][]int, player int) int {
 					}
 
 					diagSpace2++
+					if diagSpace2 > 5 {
+						break
+					}
 				}
 				//log.Println(x, y, "horScore= ", horScore, "verScore= ", verScore, "dia1 score= ", diagScore1, "dia2score = ", diagScore2, "horspace= ", horSpace, "verspace= ", verSpace, "dia1space= ", diagSpace1, "diagspace2= ", diagSpace2)
 
