@@ -133,5 +133,5 @@ func heuristic2(board [][]int, player int) int {
 		player = 1
 	}
 	enemyScore := getScore(board, player)
-	return score - enemyScore
+	return enemyScore - score
 }
