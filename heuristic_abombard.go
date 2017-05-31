@@ -15,7 +15,7 @@ func abs(x int) int {
 	return x
 }
 
-func inv(x, y) int, int {
+func inv(x, y int) (int, int) {
 	return -x, -y
 }
 
@@ -76,9 +76,9 @@ func heuristic(board [][]int, player int) int {
 				sb[x][y] = 0
 			} else {
 				if isMeNew(x, y, board, player) {
-					sb[x][y] = assignMeScore(sb, x, y, checksLeft)
+					sb[x][y] = assignMeScore(board, sb, x, y, checksLeft)
 				} else {
-					sb[x][y] = assignEnemyScore(sb, x, y, checksLeft)
+					sb[x][y] = assignEnemyScore(board, sb, x, y, checksLeft)
 				}
 				score += sb[x][y]
 			}
@@ -95,9 +95,9 @@ func heuristic(board [][]int, player int) int {
 				sb[x][y] = 0
 			} else {
 				if isMeNew(x, y, board, player) {
-					sb[x][y] = assignMeScore(sb, x, y, checksRight)
+					sb[x][y] = assignMeScore(board, sb, x, y, checksRight)
 				} else {
-					sb[x][y] = assignEnemyScore(sb, x, y, checksRight)
+					sb[x][y] = assignEnemyScore(board, sb, x, y, checksRight)
 				}
 				score += sb[x][y]
 			}
