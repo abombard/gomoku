@@ -1,20 +1,25 @@
 package main
 
-func maxval(a, b, c, d int) int {
-	best := 0
-	if a > best {
-		best = a
-	}
-	if b > best {
-		best = b
-	}
-	if c > best {
-		best = c
-	}
-	if d > best {
-		best = d
-	}
-	return best
+import "fmt"
+
+var WIDTH = 19
+var HEIGHT = 19
+
+type fnc func(x, y int, tmp [][]int, p int) bool
+
+func isEmptyNew(x, y int, board [][]int, p int) bool {
+	return board[x][y] == 0
+}
+
+func isMeNew(x, y int, board [][]int, player int) bool {
+	return board[x][y] == player+1
+}
+
+func isEnemyNew(x, y int, board [][]int, player int) bool {
+	return !isEmptyNew(x, y, board, player) && board[x][y] != player+1
+}
+func isValidCoord(x, y int) bool {
+	return x >= 0 && x < HEIGHT && y >= 0 && y < WIDTH
 }
 
 func getScore(board [][]int, player int) int {
@@ -33,92 +38,76 @@ func getScore(board [][]int, player int) int {
 				diagScore2 := 0
 				diagSpace2 := 0
 				b := 1
-				stop := false
 				for ; isValidCoord(tmpx, tmpy) && (isMeNew(tmpx, tmpy, board, player) || isEmptyNew(tmpx, tmpy, board, player)); tmpx++ {
-					if !stop && isMeNew(tmpx, tmpy, board, player) {
+					if isMeNew(tmpx, tmpy, board, player) {
 						horScore += b
 						b++
 					}
 					horSpace++
-					stop = true
 				}
-				stop = false
 				tmpx = x - 1
 				for ; isValidCoord(tmpx, tmpy) && (isMeNew(tmpx, tmpy, board, player) || isEmptyNew(tmpx, tmpy, board, player)); tmpx-- {
-					if !stop && isMeNew(tmpx, tmpy, board, player) {
+					if isMeNew(tmpx, tmpy, board, player) {
 						horScore += b
 						b++
 					}
 					horSpace++
-					stop = true
 				}
-				stop = false
 				tmpx = x
 				tmpy = y + 1
 				b = 1
 				for ; isValidCoord(tmpx, tmpy) && (isMeNew(tmpx, tmpy, board, player) || isEmptyNew(tmpx, tmpy, board, player)); tmpy++ {
-					if !stop && isMeNew(tmpx, tmpy, board, player) {
+					if isMeNew(tmpx, tmpy, board, player) {
 						verScore += b
 						b++
 					}
 					verSpace++
-					stop = true
 				}
-				stop = false
 				tmpy = y - 1
 				for ; isValidCoord(tmpx, tmpy) && (isMeNew(tmpx, tmpy, board, player) || isEmptyNew(tmpx, tmpy, board, player)); tmpy-- {
-					if !stop && isMeNew(tmpx, tmpy, board, player) {
+					if isMeNew(tmpx, tmpy, board, player) {
 						verScore += b
 						b++
 					}
 					verSpace++
-					stop = true
 				}
-				stop = false
 				b = 1
 				tmpy = y - 1
 				tmpx = x - 1
 				for ; isValidCoord(tmpx, tmpy) && (isMeNew(tmpx, tmpy, board, player) || isEmptyNew(tmpx, tmpy, board, player)); tmpx, tmpy = tmpx-1, tmpy-1 {
-					if !stop && isMeNew(tmpx, tmpy, board, player) {
+					if isMeNew(tmpx, tmpy, board, player) {
 						diagScore1 += b
 						b++
 					}
 					diagSpace1++
-					stop = true
 				}
-				stop = false
 				tmpx = x + 1
 				tmpy = y + 1
 				for ; isValidCoord(tmpx, tmpy) && (isMeNew(tmpx, tmpy, board, player) || isEmptyNew(tmpx, tmpy, board, player)); tmpx, tmpy = tmpx+1, tmpy+1 {
-					if !stop && isMeNew(tmpx, tmpy, board, player) {
+					if isMeNew(tmpx, tmpy, board, player) {
 						diagScore1 += b
 						b++
 					}
 					diagSpace1++
-					stop = true
 				}
-				stop = false
 				b = 1
 				tmpx = x + 1
 				tmpy = y - 1
 				for ; isValidCoord(tmpx, tmpy) && (isMeNew(tmpx, tmpy, board, player) || isEmptyNew(tmpx, tmpy, board, player)); tmpx, tmpy = tmpx+1, tmpy-1 {
-					if !stop && isMeNew(tmpx, tmpy, board, player) {
+					if isMeNew(tmpx, tmpy, board, player) {
 						diagScore2 += b
 						b++
 					}
 					diagSpace2++
-					stop = true
 				}
-				stop = false
 				tmpx = x - 1
 				tmpy = y + 1
 				for ; isValidCoord(tmpx, tmpy) && (isMeNew(tmpx, tmpy, board, player) || isEmptyNew(tmpx, tmpy, board, player)); tmpx, tmpy = tmpx-1, tmpy+1 {
-					if !stop && isMeNew(tmpx, tmpy, board, player) {
+					if isMeNew(tmpx, tmpy, board, player) {
 						diagScore2 += b
 						b++
 					}
 					diagSpace2++
-					stop = true
 				}
 				//log.Println(x, y, "horScore= ", horScore, "verScore= ", verScore, "dia1 score= ", diagScore1, "dia2score = ", diagScore2, "horspace= ", horSpace, "verspace= ", verSpace, "dia1space= ", diagSpace1, "diagspace2= ", diagSpace2)
 
@@ -141,15 +130,19 @@ func getScore(board [][]int, player int) int {
 	return score
 
 }
-
-func heuristic2(board [][]int, player int) int {
-	score := getScore(board, player)
-	enemyScore := getScore(board, (player+1)%2)
-	var scoreFinal int
-	if MAXDEPTH%2 == 0 {
-		scoreFinal = score - enemyScore
-	} else {
-		scoreFinal = enemyScore - score
+func main() {
+	board := make([][]int, 19)
+	for i := 0; i < HEIGHT; i++ {
+		board[i] = make([]int, 19)
+		for j := 0; j < WIDTH; j++ {
+			board[i][j] = 0
+		}
 	}
-	return scoreFinal
+
+	board[6][4] = 1
+	board[6][5] = 1
+	board[6][6] = 1
+	board[6][7] = 1
+	fmt.Println(getScore(board, 1))
+	fmt.Println(getScore(board, 0))
 }
