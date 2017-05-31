@@ -33,76 +33,92 @@ func getScore(board [][]int, player int) int {
 				diagScore2 := 0
 				diagSpace2 := 0
 				b := 1
+				stop := false
 				for ; isValidCoord(tmpx, tmpy) && (isMeNew(tmpx, tmpy, board, player) || isEmptyNew(tmpx, tmpy, board, player)); tmpx++ {
-					if isMeNew(tmpx, tmpy, board, player) {
+					if !stop && isMeNew(tmpx, tmpy, board, player) {
 						horScore += b
 						b++
 					}
 					horSpace++
+					stop = true
 				}
+				stop = false
 				tmpx = x - 1
 				for ; isValidCoord(tmpx, tmpy) && (isMeNew(tmpx, tmpy, board, player) || isEmptyNew(tmpx, tmpy, board, player)); tmpx-- {
-					if isMeNew(tmpx, tmpy, board, player) {
+					if !stop && isMeNew(tmpx, tmpy, board, player) {
 						horScore += b
 						b++
 					}
 					horSpace++
+					stop = true
 				}
+				stop = false
 				tmpx = x
 				tmpy = y + 1
 				b = 1
 				for ; isValidCoord(tmpx, tmpy) && (isMeNew(tmpx, tmpy, board, player) || isEmptyNew(tmpx, tmpy, board, player)); tmpy++ {
-					if isMeNew(tmpx, tmpy, board, player) {
+					if !stop && isMeNew(tmpx, tmpy, board, player) {
 						verScore += b
 						b++
 					}
 					verSpace++
+					stop = true
 				}
+				stop = false
 				tmpy = y - 1
 				for ; isValidCoord(tmpx, tmpy) && (isMeNew(tmpx, tmpy, board, player) || isEmptyNew(tmpx, tmpy, board, player)); tmpy-- {
-					if isMeNew(tmpx, tmpy, board, player) {
+					if !stop && isMeNew(tmpx, tmpy, board, player) {
 						verScore += b
 						b++
 					}
 					verSpace++
+					stop = true
 				}
+				stop = false
 				b = 1
 				tmpy = y - 1
 				tmpx = x - 1
 				for ; isValidCoord(tmpx, tmpy) && (isMeNew(tmpx, tmpy, board, player) || isEmptyNew(tmpx, tmpy, board, player)); tmpx, tmpy = tmpx-1, tmpy-1 {
-					if isMeNew(tmpx, tmpy, board, player) {
+					if !stop && isMeNew(tmpx, tmpy, board, player) {
 						diagScore1 += b
 						b++
 					}
 					diagSpace1++
+					stop = true
 				}
+				stop = false
 				tmpx = x + 1
 				tmpy = y + 1
 				for ; isValidCoord(tmpx, tmpy) && (isMeNew(tmpx, tmpy, board, player) || isEmptyNew(tmpx, tmpy, board, player)); tmpx, tmpy = tmpx+1, tmpy+1 {
-					if isMeNew(tmpx, tmpy, board, player) {
+					if !stop && isMeNew(tmpx, tmpy, board, player) {
 						diagScore1 += b
 						b++
 					}
 					diagSpace1++
+					stop = true
 				}
+				stop = false
 				b = 1
 				tmpx = x + 1
 				tmpy = y - 1
 				for ; isValidCoord(tmpx, tmpy) && (isMeNew(tmpx, tmpy, board, player) || isEmptyNew(tmpx, tmpy, board, player)); tmpx, tmpy = tmpx+1, tmpy-1 {
-					if isMeNew(tmpx, tmpy, board, player) {
+					if !stop && isMeNew(tmpx, tmpy, board, player) {
 						diagScore2 += b
 						b++
 					}
 					diagSpace2++
+					stop = true
 				}
+				stop = false
 				tmpx = x - 1
 				tmpy = y + 1
 				for ; isValidCoord(tmpx, tmpy) && (isMeNew(tmpx, tmpy, board, player) || isEmptyNew(tmpx, tmpy, board, player)); tmpx, tmpy = tmpx-1, tmpy+1 {
-					if isMeNew(tmpx, tmpy, board, player) {
+					if !stop && isMeNew(tmpx, tmpy, board, player) {
 						diagScore2 += b
 						b++
 					}
 					diagSpace2++
+					stop = true
 				}
 				//log.Println(x, y, "horScore= ", horScore, "verScore= ", verScore, "dia1 score= ", diagScore1, "dia2score = ", diagScore2, "horspace= ", horSpace, "verspace= ", verSpace, "dia1space= ", diagSpace1, "diagspace2= ", diagSpace2)
 
@@ -123,6 +139,7 @@ func getScore(board [][]int, player int) int {
 		}
 	}
 	return score
+
 }
 
 func heuristic2(board [][]int, player int) int {
