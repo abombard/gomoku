@@ -2,7 +2,7 @@ package main
 
 import "log"
 
-func main() {
+func TESTHEURISTIC() {
 	resetBoard()
 
 	g.Board[5][5] = 1
