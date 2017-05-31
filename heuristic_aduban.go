@@ -124,6 +124,7 @@ func getScore(board [][]int, player int, fun fnc) int {
 					}
 				}
 				//log.Println(x, y, "horScore= ", horScore, "verScore= ", verScore, "dia1 score= ", diagScore1, "dia2score = ", diagScore2, "horspace= ", horSpace, "verspace= ", verSpace, "dia1space= ", diagSpace1, "diagspace2= ", diagSpace2)
+
 				if horSpace < 4 {
 					horScore = 0
 				}
@@ -153,5 +154,5 @@ func getScore(board [][]int, player int, fun fnc) int {
 func heuristic2(board [][]int, player int) int {
 	score := getScore(board, player, isMeNew)
 	enemyScore := getScore(board, player, isEnemyNew)
-	return score - enemyScore
+	return enemyScore - score
 }
