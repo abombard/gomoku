@@ -119,6 +119,11 @@ func play(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	/*
+		TESTHEURISTIC()
+		return
+	*/
+
 	resetBoard()
 	var entry string
 	var static string

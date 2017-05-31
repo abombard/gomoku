@@ -1,6 +1,6 @@
 package main
 
-const MAXDEPTH = 1
+const MAXDEPTH = 3
 
 func getPossibleMoveList(b [][]int) []coord {
 
@@ -53,21 +53,19 @@ func recminmax(board [][]int, pt coord, player int, depth int, alpha, beta int) 
 	var newBoard [][]int
 
 	err := move(board, pt, &player, &newBoard)
+	if len(newBoard) == 0 {
+		newBoard = board
+	}
+
 	if err != nil {
 		var score int
 		if err.Error() == "Game Over" {
-			score = (MAXDEPTH - depth) * 500
+			score = heuristic2(newBoard, player)
 		} else {
-			score = (MAXDEPTH + 1) * 500
-			if player == current {
-				score = -score
-			}
+			score = -4242424242
 		}
+		board[pt.X][pt.Y] = 0
 		return step{pt, score}
-	}
-
-	if len(newBoard) == 0 {
-		newBoard = board
 	}
 
 	next := getPossibleMoveList(newBoard)
@@ -78,10 +76,14 @@ func recminmax(board [][]int, pt coord, player int, depth int, alpha, beta int) 
 	}
 
 	var v step
-	if player != current {
+	if player == current {
 		v = step{score: -10000}
 		for i := range next {
-			v = max(v, recminmax(newBoard, next[i], player, depth-1, alpha, beta))
+			tmp := recminmax(newBoard, next[i], player, depth-1, alpha, beta)
+			if tmp.score == -4242424242 {
+				continue
+			}
+			v = max(v, tmp)
 			if v.score > alpha {
 				alpha = v.score
 			}
@@ -92,7 +94,11 @@ func recminmax(board [][]int, pt coord, player int, depth int, alpha, beta int) 
 	} else {
 		v = step{score: 10000}
 		for i := range next {
-			v = min(v, recminmax(newBoard, next[i], player, depth-1, alpha, beta))
+			tmp := recminmax(newBoard, next[i], player, depth-1, alpha, beta)
+			if tmp.score == -4242424242 {
+				continue
+			}
+			v = min(v, tmp)
 			if v.score < beta {
 				beta = v.score
 			}
@@ -141,6 +147,8 @@ func minmax(board [][]int, player int) coord {
 		tmp := <-ch
 		v = max(v, tmp)
 	}
+
+	//log.Println("THE CHOOSEN ONE : ", v)
 
 	return v.coord
 }

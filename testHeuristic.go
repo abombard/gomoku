@@ -2,17 +2,41 @@ package main
 
 import "log"
 
+func p1(x, y int) {
+	g.Board[x][y] = 1
+}
+
+func p2(x, y int) {
+	g.Board[x][y] = 2
+}
+
 func TESTHEURISTIC() {
+
 	resetBoard()
 
-	g.Board[5][5] = 1
-	g.Board[5][6] = 1
-	g.Board[5][7] = 1
+	p1(5, 5)
+	p1(5, 6)
+	p1(5, 7)
+	p1(5, 8)
 
-	g.Board[7][1] = 2
-	g.Board[10][2] = 2
-	g.Board[15][1] = 2
+	p2(6, 5)
+	p2(6, 6)
+	p2(6, 7)
+	p2(6, 8)
 
-	score := heuristic(g.Board, 0)
+	score := heuristic2(g.Board, 1)
+	log.Println("score", score)
+
+	resetBoard()
+
+	p1(5, 5)
+	p1(5, 6)
+	p1(5, 7)
+
+	p2(5, 8)
+	p2(6, 6)
+	p2(6, 7)
+
+	score = heuristic2(g.Board, 1)
 	log.Println("score", score)
 }
