@@ -1,5 +1,7 @@
 package main
 
+//import "log"
+
 func maxval(a, b, c, d int) int {
 	best := 0
 	if a > best {
@@ -165,5 +167,9 @@ func heuristic2(board [][]int, player int) int {
 	} else {
 		scoreFinal = enemyScore - score
 	}
+	/*
+		log.Println("heuristic", scoreFinal)
+		printBoard(board)
+	*/
 	return scoreFinal
 }
