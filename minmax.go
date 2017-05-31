@@ -1,6 +1,6 @@
 package main
 
-const MAXDEPTH = 3
+const MAXDEPTH = 1
 
 func getPossibleMoveList(b [][]int) []coord {
 
@@ -51,6 +51,7 @@ func max(s1, s2 step) step {
 func recminmax(board [][]int, pt coord, player int, depth int, alpha, beta int) step {
 
 	board[pt.X][pt.Y] = player + 1
+	player = (player + 1) % 2
 
 	next := getPossibleMoveList(board)
 	if depth == 0 || len(next) == 0 {
