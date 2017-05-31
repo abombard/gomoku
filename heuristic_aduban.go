@@ -154,13 +154,16 @@ func getScore(board [][]int, player int) int {
 		}
 	}
 	return score
-
 }
 
 func heuristic2(board [][]int, player int) int {
 	score := getScore(board, player)
 	enemyScore := getScore(board, (player+1)%2)
 	var scoreFinal int
-	scoreFinal = score - enemyScore
+	if MAXDEPTH%2 == 1 {
+		scoreFinal = score - enemyScore
+	} else {
+		scoreFinal = enemyScore - score
+	}
 	return scoreFinal
 }

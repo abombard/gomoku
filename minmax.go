@@ -1,6 +1,6 @@
 package main
 
-const MAXDEPTH = 3
+const MAXDEPTH = 1
 
 func getPossibleMoveList(b [][]int) []coord {
 
