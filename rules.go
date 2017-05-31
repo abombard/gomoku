@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"log"
 )
 
 func isValidCoord(x, y int) bool {
@@ -138,7 +139,7 @@ func isGameOver(b [][]int, c coord, p int) bool {
 	for x, y := x0-4, y0; x <= x0+4; x++ {
 		if isValidCoord(x, y) && isMe(b[x][y], p) && !canBeCaptured(b, x, y, p) {
 			count += 1
-			if count == 4 {
+			if count == 5 {
 				return true
 			}
 		} else {
@@ -150,7 +151,7 @@ func isGameOver(b [][]int, c coord, p int) bool {
 	for x, y := x0, y0-4; y <= y0+4; y++ {
 		if isValidCoord(x, y) && isMe(b[x][y], p) && !canBeCaptured(b, x, y, p) {
 			count += 1
-			if count == 4 {
+			if count == 5 {
 				return true
 			}
 		} else {
@@ -159,30 +160,26 @@ func isGameOver(b [][]int, c coord, p int) bool {
 	}
 
 	count = 0
-	for x := x0 - 4; x <= x0+4; x++ {
-		for y := y0 - 4; y <= y0+4; y++ {
-			if isValidCoord(x, y) && isMe(b[x][y], p) && !canBeCaptured(b, x, y, p) {
-				count += 1
-				if count == 4 {
-					return true
-				}
-			} else {
-				count = 0
+	for x, y := x0-4, y0-4; x <= x0+4 && y <= y0+4; x, y = x+1, y+1 {
+		if isValidCoord(x, y) && isMe(b[x][y], p) && !canBeCaptured(b, x, y, p) {
+			count += 1
+			if count == 5 {
+				return true
 			}
+		} else {
+			count = 0
 		}
 	}
 
 	count = 0
-	for x := x0 - 4; x <= x0+4; x++ {
-		for y := y0 + 4; y >= y0-4; y-- {
-			if isValidCoord(x, y) && isMe(b[x][y], p) && !canBeCaptured(b, x, y, p) {
-				count += 1
-				if count == 4 {
-					return true
-				}
-			} else {
-				count = 0
+	for x, y := x0-4, y0+4; x <= x0+4 && y >= y0-4; x, y = x+1, y-1 {
+		if isValidCoord(x, y) && isMe(b[x][y], p) && !canBeCaptured(b, x, y, p) {
+			count += 1
+			if count == 5 {
+				return true
 			}
+		} else {
+			count = 0
 		}
 	}
 
@@ -209,9 +206,13 @@ func move(b [][]int, c coord, p *int, newBoard *[][]int) error {
 		return err
 	}
 	b[x][y] = *p + 1
-	*p = (*p + 1) % 2
+	if len(*newBoard) > 0 {
+		(*newBoard)[x][y] = *p + 1
+	}
 	if isGameOver(b, c, *p) {
+		log.Println(b)
 		return fmt.Errorf("Game Over")
 	}
+	*p = (*p + 1) % 2
 	return nil
 }
