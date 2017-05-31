@@ -97,17 +97,22 @@ func play(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	*/
-	err = isValidMove(t)
+	err = move(t)
 	if err != nil {
+		log.Println(err)
 		http.Error(w, err.Error(), 400)
 		return
 	}
-	move(t)
 	if isGameOver(t) {
 		println("Game Over")
 	}
 	if g.Mode == "solo" {
-		aiPlay()
+		t = aiPlay()
+		err = move(t)
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
 		if isGameOver(t) {
 			println("Game Over")
 		}

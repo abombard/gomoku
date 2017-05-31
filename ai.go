@@ -2,15 +2,9 @@ package main
 
 import "log"
 
-func aiPlay() {
+func aiPlay() coord {
 	coord := minmax(g.Board, current)
-	//coords := getPossiblePlays()
-	//coord := maxi(coords)
-	err := isValidMove(coord)
-	if err != nil {
-		println(err)
-	}
-	move(coord)
+	return coord
 }
 
 type fn func(x, y int, tmp [19][19]int) bool
@@ -180,5 +174,4 @@ func isPawnNearby(b [][]int, xtarg, ytarg int) bool {
 		}
 	}
 	return false
-
 }

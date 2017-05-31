@@ -56,7 +56,7 @@ func recminmax(board [][]int, pt coord, player int, depth int, alpha, beta int) 
 
 	next := getPossibleMoveList(board)
 	if depth == 0 || len(next) == 0 {
-		score := heuristic(board, player)
+		score := heuristic2(board, player)
 		board[pt.X][pt.Y] = 0
 		return step{pt, score}
 	}
