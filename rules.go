@@ -152,7 +152,7 @@ func isGameOver(c coord) bool {
 	x0, y0 := c.X, c.Y
 
 	count := 0
-	for x, y := x0-4, y0; x < x0+4; x++ {
+	for x, y := x0-4, y0; x <= x0+4; x++ {
 		if isValidCoord(x, y) && isMe(x, y) && !canBeCaptured(x, y) {
 			count += 1
 			if count == 4 {
@@ -164,7 +164,7 @@ func isGameOver(c coord) bool {
 	}
 
 	count = 0
-	for x, y := x0, y0-4; y < y0+4; y++ {
+	for x, y := x0, y0-4; y <= y0+4; y++ {
 		if isValidCoord(x, y) && isMe(x, y) && !canBeCaptured(x, y) {
 			count += 1
 			if count == 4 {
@@ -176,8 +176,8 @@ func isGameOver(c coord) bool {
 	}
 
 	count = 0
-	for x := x0 - 4; x < x0+4; x++ {
-		for y := y0 - 4; y < y0+4; y++ {
+	for x := x0 - 4; x <= x0+4; x++ {
+		for y := y0 - 4; y <= y0+4; y++ {
 			if isValidCoord(x, y) && isMe(x, y) && !canBeCaptured(x, y) {
 				count += 1
 				if count == 4 {
@@ -190,8 +190,8 @@ func isGameOver(c coord) bool {
 	}
 
 	count = 0
-	for x := x0 - 4; x < x0+4; x++ {
-		for y := y0 + 4; y > y0-4; y-- {
+	for x := x0 - 4; x <= x0+4; x++ {
+		for y := y0 + 4; y >= y0-4; y-- {
 			if isValidCoord(x, y) && isMe(x, y) && !canBeCaptured(x, y) {
 				count += 1
 				if count == 4 {

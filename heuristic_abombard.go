@@ -1,5 +1,13 @@
 package main
 
+import "log"
+
+func printBoard(b [][]int) {
+	for x := 0; x < HEIGHT; x++ {
+		log.Println(b[x])
+	}
+}
+
 func abs(x int) int {
 	if x < 0 {
 		return -x
@@ -73,6 +81,9 @@ func heuristic(board [][]int, player int) int {
 		}
 	}
 
+	log.Println("==== left to right ===")
+	printBoard(sb)
+
 	// right to left
 	for x := range board {
 		for y := range board[x] {
@@ -86,6 +97,9 @@ func heuristic(board [][]int, player int) int {
 			}
 		}
 	}
+
+	log.Println("==== right to ileft ===")
+	printBoard(sb)
 
 	return score
 }
