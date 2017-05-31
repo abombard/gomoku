@@ -15,17 +15,19 @@ func abs(x int) int {
 	return x
 }
 
-func addScore(sb [][]int, x, y int, checks [][2]int) int {
+func inv(x, y) int, int {
+	return -x, -y
+}
+
+func assignMeScore(b, sb [][]int, x, y int, checks [][2]int) int {
 
 	score := 0
 
 	for i := range checks {
 		x1, y1 := x+checks[i][0], y+checks[i][1]
 		if isValidCoord(x1, y1) {
-			if sb[x1][y1] > 0 {
-				score += sb[x1][y1] + 1
-			} else {
-				score += sb[x1][y1] - 1
+			if sb[x1][y1] >= score {
+				score = sb[x1][y1]*sb[x1][y1] + 1
 			}
 		}
 	}
@@ -33,19 +35,15 @@ func addScore(sb [][]int, x, y int, checks [][2]int) int {
 	return score
 }
 
-func assignScore(sb [][]int, x, y int, me bool, checks [][2]int) int {
+func assignEnemyScore(b, sb [][]int, x, y int, checks [][2]int) int {
 
 	score := 0
 
 	for i := range checks {
 		x1, y1 := x+checks[i][0], y+checks[i][1]
 		if isValidCoord(x1, y1) {
-			if abs(sb[x1][y1]) >= abs(score) {
-				if me && sb[x1][y1] >= 0 {
-					score = sb[x1][y1] + 1
-				} else if !me && sb[x1][y1] <= 0 {
-					score = sb[x1][y1] - 1
-				}
+			if sb[x1][y1] <= score {
+				score = -(sb[x1][y1]*sb[x1][y1] + 1)
 			}
 		}
 	}
@@ -55,18 +53,21 @@ func assignScore(sb [][]int, x, y int, me bool, checks [][2]int) int {
 
 func heuristic(board [][]int, player int) int {
 
-	// heuristic score
-	score := 0
-
 	// score board
 	sb := make([][]int, HEIGHT)
 	for x := range board {
 		sb[x] = make([]int, WIDTH)
 	}
 
+	log.Println("=== the board ===")
+	printBoard(board)
+
 	// checks from left
 	checksLeft := [][2]int{{-1, 0}, {-1, -1}, {0, -1}, {1, -1}}
 	checksRight := [][2]int{{1, 0}, {1, 1}, {-1, 0}, {-1, 1}}
+
+	// heuristic score
+	score := 0
 
 	// left to right
 	for x := range board {
@@ -74,14 +75,17 @@ func heuristic(board [][]int, player int) int {
 			if isEmptyNew(x, y, board, player) {
 				sb[x][y] = 0
 			} else {
-				sb[x][y] = assignScore(sb, x, y,
-					isMeNew(x, y, board, player),
-					checksLeft)
+				if isMeNew(x, y, board, player) {
+					sb[x][y] = assignMeScore(sb, x, y, checksLeft)
+				} else {
+					sb[x][y] = assignEnemyScore(sb, x, y, checksLeft)
+				}
+				score += sb[x][y]
 			}
 		}
 	}
 
-	log.Println("==== left to right ===")
+	log.Println("==== first ===")
 	printBoard(sb)
 
 	// right to left
@@ -89,17 +93,16 @@ func heuristic(board [][]int, player int) int {
 		for y := range board[x] {
 			if isEmptyNew(x, y, board, player) {
 				sb[x][y] = 0
-				score += addScore(sb, x, y, checksRight)
 			} else {
-				sb[x][y] = assignScore(sb, x, y,
-					isMeNew(x, y, board, player),
-					checksRight)
+				if isMeNew(x, y, board, player) {
+					sb[x][y] = assignMeScore(sb, x, y, checksRight)
+				} else {
+					sb[x][y] = assignEnemyScore(sb, x, y, checksRight)
+				}
+				score += sb[x][y]
 			}
 		}
 	}
-
-	log.Println("==== right to ileft ===")
-	printBoard(sb)
 
 	return score
 }

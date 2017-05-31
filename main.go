@@ -122,7 +122,7 @@ func play(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(g.Board)
 }
 
-func main() {
+func TMPmain() {
 	resetBoard()
 	var entry string
 	var static string
