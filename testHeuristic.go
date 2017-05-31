@@ -13,7 +13,6 @@ func TESTHEURISTIC() {
 	g.Board[10][2] = 2
 	g.Board[15][1] = 2
 
-	b := boardSlice()
-	score := heuristic(b, 0)
+	score := heuristic(g.Board, 0)
 	log.Println("score", score)
 }

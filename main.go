@@ -18,7 +18,7 @@ const (
 )
 
 type Gomoku struct {
-	Board [HEIGHT][WIDTH]int
+	Board [][]int
 	Mode  string
 }
 
@@ -39,8 +39,10 @@ type start struct {
 }
 
 func resetBoard() {
-	for x := range g.Board {
-		for y := range g.Board {
+	g.Board = make([][]int, HEIGHT)
+	for x := 0; x < HEIGHT; x++ {
+		g.Board[x] = make([]int, WIDTH)
+		for y := 0; y < WIDTH; y++ {
 			g.Board[x][y] = 0
 		}
 	}
@@ -97,24 +99,18 @@ func play(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	*/
-	err = move(t)
+	err = move(g.Board, t, &current, &g.Board)
 	if err != nil {
 		log.Println(err)
 		http.Error(w, err.Error(), 400)
 		return
 	}
-	if isGameOver(t) {
-		println("Game Over")
-	}
 	if g.Mode == "solo" {
 		t = aiPlay()
-		err = move(t)
+		err = move(g.Board, t, &current, &g.Board)
 		if err != nil {
 			log.Fatal(err)
 			return
-		}
-		if isGameOver(t) {
-			println("Game Over")
 		}
 	}
 	w.Header().Set("Content-Type", "application/json")

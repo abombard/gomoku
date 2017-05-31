@@ -1,24 +1,26 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+)
 
 func isValidCoord(x, y int) bool {
 	return x >= 0 && x < HEIGHT && y >= 0 && y < WIDTH
 }
 
-func isEmpty(x, y int) bool {
-	return g.Board[x][y] == 0
+func isEmpty(c int) bool {
+	return c == 0
 }
 
-func isEnemy(x, y int) bool {
-	return !isEmpty(x, y) && g.Board[x][y] != current+1
+func isEnemy(c, p int) bool {
+	return !isEmpty(c) && c != p+1
 }
 
-func isMe(x, y int) bool {
-	return !isEmpty(x, y) && g.Board[x][y] == current+1
+func isMe(c, p int) bool {
+	return !isEmpty(c) && c == p+1
 }
 
-func introduceDoubleThree(x, y int) bool {
+func introduceDoubleThree(b [][]int, x, y int, p int) bool {
 
 	checks := [4][6][2]int{
 		{{-3, -3}, {-2, -2}, {-1, -1}, {1, 1}, {2, 2}, {3, 3}},
@@ -40,13 +42,13 @@ func introduceDoubleThree(x, y int) bool {
 			}
 			x1, y1 := x+checks[i][j][0], y+checks[i][j][1]
 			if isValidCoord(x1, y1) {
-				if isMe(x1, y1) {
+				if isMe(b[x1][y1], p) {
 					blank = 0
 					count += 1
 					if count == 3 {
 						break
 					}
-				} else if isEnemy(x1, y1) {
+				} else if isEnemy(b[x1][y1], p) {
 					blank = 0
 					count = 0
 				} else {
@@ -65,7 +67,7 @@ func introduceDoubleThree(x, y int) bool {
 	return threeCount > 1
 }
 
-func capture(x, y int) bool {
+func capture(b [][]int, x, y int, p int, newBoard *[][]int) bool {
 
 	ret := false
 
@@ -85,10 +87,14 @@ func capture(x, y int) bool {
 		x2, y2 := x+p2[0], y+p2[1]
 		x3, y3 := x+p3[0], y+p3[1]
 		if isValidCoord(x1, y1) && isValidCoord(x2, y2) && isValidCoord(x3, y3) {
-			if isEnemy(x1, y1) && isEnemy(x2, y2) && isMe(x3, y3) {
+			if isEnemy(b[x1][y1], p) && isEnemy(b[x2][y2], p) && isMe(b[x3][y3], p) {
 				// Successfully captured
-				g.Board[x1][y1] = 0
-				g.Board[x2][y2] = 0
+
+				if len(*newBoard) == 0 {
+					*newBoard = boardCopy(b)
+				}
+				(*newBoard)[x1][y1] = 0
+				(*newBoard)[x2][y2] = 0
 				ret = true
 			}
 		}
@@ -97,30 +103,7 @@ func capture(x, y int) bool {
 	return ret
 }
 
-func isValidMove(c coord) error {
-	x, y := c.X, c.Y
-	if !isValidCoord(x, y) {
-		return fmt.Errorf("Invalid coordonate")
-	} else if !isEmpty(x, y) {
-		return fmt.Errorf("Case already taken")
-	} else if !capture(x, y) && introduceDoubleThree(x, y) {
-		return fmt.Errorf("Illegal move")
-	}
-	return nil
-}
-
-func move(c coord) error {
-	err := isValidMove(c)
-	if err != nil {
-		return err
-	}
-	x, y := c.X, c.Y
-	g.Board[x][y] = current + 1
-	current = (current + 1) % 2
-	return nil
-}
-
-func canBeCaptured(x, y int) bool {
+func canBeCaptured(b [][]int, x, y int, p int) bool {
 
 	checks := [][4][2]int{
 		{{-2, -2}, {-1, -1}, {1, 1}, {2, 2}},
@@ -135,12 +118,12 @@ func canBeCaptured(x, y int) bool {
 		x3, y3 := x+p3[0], y+p3[1]
 		x4, y4 := x+p4[0], y+p4[1]
 		if isValidCoord(x1, y1) && isValidCoord(x2, y2) && isValidCoord(x3, y3) {
-			if isMe(x2, y2) && ((isEmpty(x1, y1) && isEnemy(x3, y3)) || (isEnemy(x1, y1) && isEmpty(x3, y3))) {
+			if isMe(b[x2][y1], p) && ((isEmpty(b[x1][y1]) && isEnemy(b[x3][y3], p)) || (isEnemy(b[x1][y1], p) && isEmpty(b[x3][y3]))) {
 				return true
 			}
 		}
 		if isValidCoord(x2, y2) && isValidCoord(x3, y3) && isValidCoord(x4, y4) {
-			if isMe(x3, y3) && ((isEmpty(x2, y2) && isEnemy(x4, y4)) || (isEnemy(x2, y2) && isEmpty(x4, y4))) {
+			if isMe(b[x3][y3], p) && ((isEmpty(b[x2][y2]) && isEnemy(b[x4][y4], p)) || (isEnemy(b[x2][y2], p) && isEmpty(b[x4][y4]))) {
 				return true
 			}
 		}
@@ -148,12 +131,12 @@ func canBeCaptured(x, y int) bool {
 	return false
 }
 
-func isGameOver(c coord) bool {
+func isGameOver(b [][]int, c coord, p int) bool {
 	x0, y0 := c.X, c.Y
 
 	count := 0
 	for x, y := x0-4, y0; x <= x0+4; x++ {
-		if isValidCoord(x, y) && isMe(x, y) && !canBeCaptured(x, y) {
+		if isValidCoord(x, y) && isMe(b[x][y], p) && !canBeCaptured(b, x, y, p) {
 			count += 1
 			if count == 4 {
 				return true
@@ -165,7 +148,7 @@ func isGameOver(c coord) bool {
 
 	count = 0
 	for x, y := x0, y0-4; y <= y0+4; y++ {
-		if isValidCoord(x, y) && isMe(x, y) && !canBeCaptured(x, y) {
+		if isValidCoord(x, y) && isMe(b[x][y], p) && !canBeCaptured(b, x, y, p) {
 			count += 1
 			if count == 4 {
 				return true
@@ -178,7 +161,7 @@ func isGameOver(c coord) bool {
 	count = 0
 	for x := x0 - 4; x <= x0+4; x++ {
 		for y := y0 - 4; y <= y0+4; y++ {
-			if isValidCoord(x, y) && isMe(x, y) && !canBeCaptured(x, y) {
+			if isValidCoord(x, y) && isMe(b[x][y], p) && !canBeCaptured(b, x, y, p) {
 				count += 1
 				if count == 4 {
 					return true
@@ -192,7 +175,7 @@ func isGameOver(c coord) bool {
 	count = 0
 	for x := x0 - 4; x <= x0+4; x++ {
 		for y := y0 + 4; y >= y0-4; y-- {
-			if isValidCoord(x, y) && isMe(x, y) && !canBeCaptured(x, y) {
+			if isValidCoord(x, y) && isMe(b[x][y], p) && !canBeCaptured(b, x, y, p) {
 				count += 1
 				if count == 4 {
 					return true
@@ -204,4 +187,31 @@ func isGameOver(c coord) bool {
 	}
 
 	return false
+}
+
+func isValidMove(b [][]int, x, y int, p int, newBoard *[][]int) error {
+	if !isValidCoord(x, y) {
+		return fmt.Errorf("Invalid coordonate")
+	} else if !isEmpty(b[x][y]) {
+		return fmt.Errorf("Case already taken")
+	} else {
+		if !capture(b, x, y, p, newBoard) && introduceDoubleThree(b, x, y, p) {
+			return fmt.Errorf("Illegal move")
+		}
+	}
+	return nil
+}
+
+func move(b [][]int, c coord, p *int, newBoard *[][]int) error {
+	x, y := c.X, c.Y
+	err := isValidMove(b, x, y, *p, newBoard)
+	if err != nil {
+		return err
+	}
+	b[x][y] = *p + 1
+	*p = (*p + 1) % 2
+	if isGameOver(b, c, *p) {
+		return fmt.Errorf("Game Over")
+	}
+	return nil
 }

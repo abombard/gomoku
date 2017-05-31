@@ -1,6 +1,6 @@
 package main
 
-const MAXDEPTH = 4
+const MAXDEPTH = 3
 
 func getPossibleMoveList(b [][]int) []coord {
 
@@ -50,22 +50,39 @@ func max(s1, s2 step) step {
 
 func recminmax(board [][]int, pt coord, player int, depth int, alpha, beta int) step {
 
-	board[pt.X][pt.Y] = player + 1
+	var newBoard [][]int
 
-	next := getPossibleMoveList(board)
-	if depth == 0 || len(next) == 0 {
-		score := heuristic2(board, player)
-		board[pt.X][pt.Y] = 0
+	err := move(board, pt, &player, &newBoard)
+	if err != nil {
+		var score int
+		if err.Error() == "Game Over" {
+			if player == current {
+				score = (MAXDEPTH - depth) * 500
+			} else {
+				score = -(MAXDEPTH - depth) * 500
+			}
+		} else {
+			score = -(MAXDEPTH + 1) * 500
+		}
 		return step{pt, score}
 	}
 
-	player = (player + 1) % 2
+	if len(newBoard) == 0 {
+		newBoard = board
+	}
+
+	next := getPossibleMoveList(newBoard)
+	if depth == 0 || len(next) == 0 {
+		score := heuristic2(newBoard, player)
+		board[pt.X][pt.Y] = 0
+		return step{pt, score}
+	}
 
 	var v step
 	if player != current {
 		v = step{score: -10000}
 		for i := range next {
-			v = max(v, recminmax(board, next[i], player, depth-1, alpha, beta))
+			v = max(v, recminmax(newBoard, next[i], player, depth-1, alpha, beta))
 			if v.score > alpha {
 				alpha = v.score
 			}
@@ -76,7 +93,7 @@ func recminmax(board [][]int, pt coord, player int, depth int, alpha, beta int) 
 	} else {
 		v = step{score: 10000}
 		for i := range next {
-			v = min(v, recminmax(board, next[i], player, depth-1, alpha, beta))
+			v = min(v, recminmax(newBoard, next[i], player, depth-1, alpha, beta))
 			if v.score < beta {
 				beta = v.score
 			}
@@ -91,35 +108,33 @@ func recminmax(board [][]int, pt coord, player int, depth int, alpha, beta int) 
 	return step{pt, v.score}
 }
 
-func boardSlice() [][]int {
+func boardCopy(board [][]int) [][]int {
 	b := make([][]int, HEIGHT)
 	for i := 0; i < HEIGHT; i++ {
 		b[i] = make([]int, WIDTH)
 		for j := 0; j < WIDTH; j++ {
-			b[i][j] = g.Board[i][j]
+			b[i][j] = board[i][j]
 		}
 	}
 	return b
 }
 
-func minmaxRoutine(pt coord, player int, ch chan step) {
+func minmaxRoutine(board [][]int, pt coord, player int, ch chan step) {
 
 	// create a new slice for each go routine
-	b := boardSlice()
+	b := boardCopy(board)
 
 	ch <- recminmax(b, pt, player, MAXDEPTH, -10000, 10000)
 }
 
-func minmax(board [HEIGHT][WIDTH]int, player int) coord {
+func minmax(board [][]int, player int) coord {
 
-	b := boardSlice()
-
-	nextMoves := getPossibleMoveList(b)
+	nextMoves := getPossibleMoveList(board)
 	ch := make(chan step, len(nextMoves))
 
 	for x := 0; x < len(nextMoves); x++ {
 
-		go minmaxRoutine(nextMoves[x], player, ch)
+		go minmaxRoutine(board, nextMoves[x], player, ch)
 	}
 
 	v := step{score: -10000}
