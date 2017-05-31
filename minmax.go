@@ -56,13 +56,12 @@ func recminmax(board [][]int, pt coord, player int, depth int, alpha, beta int) 
 	if err != nil {
 		var score int
 		if err.Error() == "Game Over" {
-			if player == current {
-				score = (MAXDEPTH - depth) * 500
-			} else {
-				score = -(MAXDEPTH - depth) * 500
-			}
+			score = (MAXDEPTH - depth) * 500
 		} else {
-			score = -(MAXDEPTH + 1) * 500
+			score = (MAXDEPTH + 1) * 500
+			if player == current {
+				score = -score
+			}
 		}
 		return step{pt, score}
 	}
