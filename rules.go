@@ -2,9 +2,29 @@ package main
 
 import (
 	"fmt"
-	"log"
 )
 
+func getPossibleMoveListNew(b [][]int, pt, old coord) []coord {
+
+	var coords []coord
+	for x := -4; x < 5; x++ {
+		for y := -4; y < 5; y++ {
+			if isValidCoord(pt.X+x, pt.Y+y) && b[pt.X+x][pt.Y+y] == 0 {
+				coords = append(coords, coord{X: pt.X + x, Y: pt.Y + y})
+			}
+
+		}
+	}
+	for x := -4; x < 5; x++ {
+		for y := -4; y < 5; y++ {
+			if isValidCoord(old.X+x, old.Y+y) && b[old.X+x][old.Y+y] == 0 {
+				coords = append(coords, coord{X: old.X + x, Y: old.Y + y})
+			}
+
+		}
+	}
+	return coords
+}
 func isValidCoord(x, y int) bool {
 	return x >= 0 && x < HEIGHT && y >= 0 && y < WIDTH
 }
