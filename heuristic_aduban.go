@@ -17,8 +17,6 @@ func maxval(a, b, c, d int) int {
 	return best
 }
 
-type fnc func(x, y int, tmp [][]int, p int) bool
-
 func getScore(board [][]int, player int) int {
 	score := 0
 	for x := 0; x < WIDTH; x++ {
@@ -125,16 +123,15 @@ func getScore(board [][]int, player int) int {
 		}
 	}
 	return score
-
 }
 
 func heuristic2(board [][]int, player int) int {
 	score := getScore(board, player)
-	if player == 2 {
+	if player == 1 {
+		player = 0
+	} else if player == 0 {
 		player = 1
-	} else if player == 1 {
-		player = 2
 	}
 	enemyScore := getScore(board, player)
-	return enemyScore - score
+	return score - enemyScore
 }
