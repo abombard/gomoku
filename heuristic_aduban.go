@@ -38,9 +38,11 @@ func getScore(board [][]int, player int) int {
 					if !stop && isMeNew(tmpx, tmpy, board, player) {
 						horScore += b
 						b++
+					} else {
+						stop = true
 					}
+
 					horSpace++
-					stop = true
 				}
 				stop = false
 				tmpx = x - 1
@@ -48,9 +50,11 @@ func getScore(board [][]int, player int) int {
 					if !stop && isMeNew(tmpx, tmpy, board, player) {
 						horScore += b
 						b++
+					} else {
+						stop = true
 					}
+
 					horSpace++
-					stop = true
 				}
 				stop = false
 				tmpx = x
@@ -60,9 +64,10 @@ func getScore(board [][]int, player int) int {
 					if !stop && isMeNew(tmpx, tmpy, board, player) {
 						verScore += b
 						b++
+					} else {
+						stop = true
 					}
 					verSpace++
-					stop = true
 				}
 				stop = false
 				tmpy = y - 1
@@ -70,9 +75,11 @@ func getScore(board [][]int, player int) int {
 					if !stop && isMeNew(tmpx, tmpy, board, player) {
 						verScore += b
 						b++
+					} else {
+						stop = true
 					}
+
 					verSpace++
-					stop = true
 				}
 				stop = false
 				b = 1
@@ -82,9 +89,11 @@ func getScore(board [][]int, player int) int {
 					if !stop && isMeNew(tmpx, tmpy, board, player) {
 						diagScore1 += b
 						b++
+					} else {
+						stop = true
 					}
+
 					diagSpace1++
-					stop = true
 				}
 				stop = false
 				tmpx = x + 1
@@ -93,9 +102,11 @@ func getScore(board [][]int, player int) int {
 					if !stop && isMeNew(tmpx, tmpy, board, player) {
 						diagScore1 += b
 						b++
+					} else {
+						stop = true
 					}
+
 					diagSpace1++
-					stop = true
 				}
 				stop = false
 				b = 1
@@ -105,9 +116,11 @@ func getScore(board [][]int, player int) int {
 					if !stop && isMeNew(tmpx, tmpy, board, player) {
 						diagScore2 += b
 						b++
+					} else {
+						stop = true
 					}
+
 					diagSpace2++
-					stop = true
 				}
 				stop = false
 				tmpx = x - 1
@@ -116,9 +129,11 @@ func getScore(board [][]int, player int) int {
 					if !stop && isMeNew(tmpx, tmpy, board, player) {
 						diagScore2 += b
 						b++
+					} else {
+						stop = true
 					}
+
 					diagSpace2++
-					stop = true
 				}
 				//log.Println(x, y, "horScore= ", horScore, "verScore= ", verScore, "dia1 score= ", diagScore1, "dia2score = ", diagScore2, "horspace= ", horSpace, "verspace= ", verSpace, "dia1space= ", diagSpace1, "diagspace2= ", diagSpace2)
 
@@ -146,10 +161,6 @@ func heuristic2(board [][]int, player int) int {
 	score := getScore(board, player)
 	enemyScore := getScore(board, (player+1)%2)
 	var scoreFinal int
-	if MAXDEPTH%2 == 0 {
-		scoreFinal = score - enemyScore
-	} else {
-		scoreFinal = enemyScore - score
-	}
+	scoreFinal = score - enemyScore
 	return scoreFinal
 }
