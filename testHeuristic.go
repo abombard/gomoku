@@ -24,7 +24,7 @@ func TESTHEURISTIC() {
 	p2(6, 7)
 	p2(6, 8)
 
-	score := heuristic2(g.Board, 1)
+	score := heuristic2(g.Board)
 	log.Println("score", score)
 
 	resetBoard()
@@ -37,6 +37,6 @@ func TESTHEURISTIC() {
 	p2(6, 6)
 	p2(6, 7)
 
-	score = heuristic2(g.Board, 1)
+	score = heuristic2(g.Board)
 	log.Println("score", score)
 }

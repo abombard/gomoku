@@ -198,20 +198,18 @@ func isValidMove(b [][]int, x, y int, p int, newBoard *[][]int) error {
 	return nil
 }
 
-func move(b [][]int, c coord, p *int, newBoard *[][]int) error {
+func move(b [][]int, c coord, p int, newBoard *[][]int) error {
 	x, y := c.X, c.Y
-	err := isValidMove(b, x, y, *p, newBoard)
+	err := isValidMove(b, x, y, p, newBoard)
 	if err != nil {
 		return err
 	}
-	b[x][y] = *p + 1
+	b[x][y] = p + 1
 	if len(*newBoard) > 0 {
-		(*newBoard)[x][y] = *p + 1
+		(*newBoard)[x][y] = p + 1
 	}
-	if isGameOver(b, c, *p) {
-		*p = (*p + 1) % 2
+	if isGameOver(b, c, p) {
 		return fmt.Errorf("Game Over")
 	}
-	*p = (*p + 1) % 2
 	return nil
 }

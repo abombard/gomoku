@@ -99,7 +99,8 @@ func play(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	*/
-	err = move(g.Board, t, &current, &g.Board)
+	err = move(g.Board, t, current, &g.Board)
+	current = (current + 1) % 2
 	if err != nil {
 		log.Println(err)
 		http.Error(w, err.Error(), 400)
@@ -107,9 +108,10 @@ func play(w http.ResponseWriter, r *http.Request) {
 	}
 	if g.Mode == "solo" {
 		t = aiPlay()
-		err = move(g.Board, t, &current, &g.Board)
+		err = move(g.Board, t, current, &g.Board)
+		current = (current + 1) % 2
 		if err != nil {
-			log.Fatal(err)
+			log.Fatal("AI", err)
 			return
 		}
 	}
