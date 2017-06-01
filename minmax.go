@@ -41,7 +41,7 @@ func recminmax(board [][]int, pt coord, player int, depth int, alpha, beta int, 
 	next := getPossibleMoveList(board)
 	// ERROR depth == MAXDEPTH && len(next) == 0 -> pt = shit
 	if depth == MAXDEPTH && len(next) == 0 {
-		log.Fatal("depth == MAXDEPTH && len(next) == 0")
+		log.Fatal("depth == MAXDEPTH && len(next) == 0: GAME OVER")
 	}
 	if depth == 0 || len(next) == 0 {
 		if ch != nil {
@@ -52,9 +52,9 @@ func recminmax(board [][]int, pt coord, player int, depth int, alpha, beta int, 
 
 	var v step
 	if player == current {
-		v = step{score: -10000}
+		v = step{score: -1000000}
 	} else {
-		v = step{score: 10000}
+		v = step{score: 1000000}
 	}
 
 	if depth == MAXDEPTH {
