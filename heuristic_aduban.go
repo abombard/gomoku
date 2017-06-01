@@ -200,7 +200,13 @@ func getScore(board [][]int, player int) int {
 					diagScore2 = 0
 				}
 
-				score += horScore + verScore + diagScore1 + diagScore2
+				var dia int
+				if diagScore1 > diagScore2 {
+					dia = diagScore1
+				} else {
+					dia = diagScore2
+				}
+				score += horScore + verScore + dia
 			}
 		}
 	}
