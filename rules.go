@@ -139,7 +139,7 @@ func canBeCaptured(b [][]int, x, y int, p int) bool {
 		x3, y3 := x+p3[0], y+p3[1]
 		x4, y4 := x+p4[0], y+p4[1]
 		if isValidCoord(x1, y1) && isValidCoord(x2, y2) && isValidCoord(x3, y3) {
-			if isMe(b[x2][y1], p) && ((isEmpty(b[x1][y1]) && isEnemy(b[x3][y3], p)) || (isEnemy(b[x1][y1], p) && isEmpty(b[x3][y3]))) {
+			if isMe(b[x2][y2], p) && ((isEmpty(b[x1][y1]) && isEnemy(b[x3][y3], p)) || (isEnemy(b[x1][y1], p) && isEmpty(b[x3][y3]))) {
 				return true
 			}
 		}
