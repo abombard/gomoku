@@ -175,7 +175,11 @@ func getScore(board [][]int, player int) int {
 				if diagSpace2 < 4 {
 					diagScore2 = 0
 				}
+
 				score += horScore + verScore + diagScore1 + diagScore2
+				if canBeCaptured(board, x, y, player) {
+					score /= 2
+				}
 			}
 		}
 	}
