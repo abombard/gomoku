@@ -38,6 +38,9 @@ func getScore(board [][]int, player int) int {
 				stop := false
 				for ; isValidCoord(tmpx, tmpy) && (isMeNew(tmpx, tmpy, board, player) || isEmptyNew(tmpx, tmpy, board, player)); tmpx++ {
 					if !stop && isMeNew(tmpx, tmpy, board, player) {
+						if canBeCaptured(board, tmpx, tmpy, player) {
+							b = 1
+						}
 						horScore += b
 						b++
 					} else {
@@ -53,6 +56,9 @@ func getScore(board [][]int, player int) int {
 				tmpx = x - 1
 				for ; isValidCoord(tmpx, tmpy) && (isMeNew(tmpx, tmpy, board, player) || isEmptyNew(tmpx, tmpy, board, player)); tmpx-- {
 					if !stop && isMeNew(tmpx, tmpy, board, player) {
+						if canBeCaptured(board, tmpx, tmpy, player) {
+							b = 1
+						}
 						horScore += b
 						b++
 					} else {
@@ -70,6 +76,9 @@ func getScore(board [][]int, player int) int {
 				b = 1
 				for ; isValidCoord(tmpx, tmpy) && (isMeNew(tmpx, tmpy, board, player) || isEmptyNew(tmpx, tmpy, board, player)); tmpy++ {
 					if !stop && isMeNew(tmpx, tmpy, board, player) {
+						if canBeCaptured(board, tmpx, tmpy, player) {
+							b = 1
+						}
 						verScore += b
 						b++
 					} else {
@@ -84,6 +93,9 @@ func getScore(board [][]int, player int) int {
 				tmpy = y - 1
 				for ; isValidCoord(tmpx, tmpy) && (isMeNew(tmpx, tmpy, board, player) || isEmptyNew(tmpx, tmpy, board, player)); tmpy-- {
 					if !stop && isMeNew(tmpx, tmpy, board, player) {
+						if canBeCaptured(board, tmpx, tmpy, player) {
+							b = 1
+						}
 						verScore += b
 						b++
 					} else {
@@ -101,6 +113,9 @@ func getScore(board [][]int, player int) int {
 				tmpx = x - 1
 				for ; isValidCoord(tmpx, tmpy) && (isMeNew(tmpx, tmpy, board, player) || isEmptyNew(tmpx, tmpy, board, player)); tmpx, tmpy = tmpx-1, tmpy-1 {
 					if !stop && isMeNew(tmpx, tmpy, board, player) {
+						if canBeCaptured(board, tmpx, tmpy, player) {
+							b = 1
+						}
 						diagScore1 += b
 						b++
 					} else {
@@ -117,6 +132,9 @@ func getScore(board [][]int, player int) int {
 				tmpy = y + 1
 				for ; isValidCoord(tmpx, tmpy) && (isMeNew(tmpx, tmpy, board, player) || isEmptyNew(tmpx, tmpy, board, player)); tmpx, tmpy = tmpx+1, tmpy+1 {
 					if !stop && isMeNew(tmpx, tmpy, board, player) {
+						if canBeCaptured(board, tmpx, tmpy, player) {
+							b = 1
+						}
 						diagScore1 += b
 						b++
 					} else {
@@ -134,6 +152,9 @@ func getScore(board [][]int, player int) int {
 				tmpy = y - 1
 				for ; isValidCoord(tmpx, tmpy) && (isMeNew(tmpx, tmpy, board, player) || isEmptyNew(tmpx, tmpy, board, player)); tmpx, tmpy = tmpx+1, tmpy-1 {
 					if !stop && isMeNew(tmpx, tmpy, board, player) {
+						if canBeCaptured(board, tmpx, tmpy, player) {
+							b = 1
+						}
 						diagScore2 += b
 						b++
 					} else {
@@ -150,6 +171,9 @@ func getScore(board [][]int, player int) int {
 				tmpy = y + 1
 				for ; isValidCoord(tmpx, tmpy) && (isMeNew(tmpx, tmpy, board, player) || isEmptyNew(tmpx, tmpy, board, player)); tmpx, tmpy = tmpx-1, tmpy+1 {
 					if !stop && isMeNew(tmpx, tmpy, board, player) {
+						if canBeCaptured(board, tmpx, tmpy, player) {
+							b = 1
+						}
 						diagScore2 += b
 						b++
 					} else {
