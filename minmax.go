@@ -1,6 +1,8 @@
 package main
 
-const MAXDEPTH = 5
+import "log"
+
+const MAXDEPTH = 3
 
 func getPossibleMoveList(b [][]int) []coord {
 
@@ -38,6 +40,9 @@ func recminmax(board [][]int, pt coord, player int, depth int, alpha, beta int, 
 
 	next := getPossibleMoveList(board)
 	// ERROR depth == MAXDEPTH && len(next) == 0 -> pt = shit
+	if depth == MAXDEPTH && len(next) == 0 {
+		log.Fatal("depth == MAXDEPTH && len(next) == 0")
+	}
 	if depth == 0 || len(next) == 0 {
 		if ch != nil {
 			ch <- step{pt, heuristic2(board)}
