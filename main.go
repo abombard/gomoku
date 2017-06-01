@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"runtime"
 	"time"
 
 	"github.com/gorilla/handlers"
@@ -126,6 +127,8 @@ func main() {
 		TESTHEURISTIC()
 		return
 	*/
+
+	log.Println("GOMAXPROCS: ", runtime.GOMAXPROCS(0))
 
 	resetBoard()
 	var entry string
