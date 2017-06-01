@@ -36,18 +36,18 @@ type step struct {
 	score int
 }
 
-func recminmax(board [][]int, pt coord, player int, depth int, alpha, beta int, ch chan step) step {
+func recminmax(board [][]int, pt coord, player int, depth int, alpha, beta int, ch chan step, gameOver bool) step {
 
 	next := getPossibleMoveList(board)
 	// ERROR depth == MAXDEPTH && len(next) == 0 -> pt = shit
 	if depth == MAXDEPTH && len(next) == 0 {
 		log.Fatal("depth == MAXDEPTH && len(next) == 0: GAME OVER")
 	}
-	if depth == 0 || len(next) == 0 {
+	if depth == 0 || gameOver || len(next) == 0 {
 		if ch != nil {
-			ch <- step{pt, heuristic2(board)}
+			ch <- step{pt, (depth + 1) * heuristic2(board)}
 		}
-		return step{pt, heuristic2(board)}
+		return step{pt, (depth + 1) * heuristic2(board)}
 	}
 
 	var v step
@@ -65,17 +65,18 @@ func recminmax(board [][]int, pt coord, player int, depth int, alpha, beta int, 
 
 			b := boardCopy(board)
 
+			gameOver := false
 			err := move(b, next[i], player, &b)
 			if err != nil {
 				if err.Error() == "Game Over" {
-					depth = 1
+					gameOver = true
 				} else {
 					k++
 					continue
 				}
 			}
 
-			go recminmax(b, next[i], (player+1)%2, depth-1, alpha, beta, newch)
+			go recminmax(b, next[i], (player+1)%2, depth-1, alpha, beta, newch, gameOver)
 		}
 
 		for i := 0; i < len(next)-k; i++ {
@@ -109,17 +110,19 @@ func recminmax(board [][]int, pt coord, player int, depth int, alpha, beta int, 
 
 		for i := range next {
 
+			gameOver := false
+
 			var newBoard [][]int
 			err := move(board, next[i], player, &newBoard)
 			if err != nil {
 				if err.Error() == "Game Over" {
-					depth = 1
+					gameOver = true
 				} else {
 					continue
 				}
 			}
 
-			tmp := recminmax(newBoard, next[i], (player+1)%2, depth-1, alpha, beta, nil)
+			tmp := recminmax(newBoard, next[i], (player+1)%2, depth-1, alpha, beta, nil, gameOver)
 			if player == current {
 				if tmp.score > v.score {
 					v.coord = pt
@@ -182,7 +185,7 @@ func minmax(board [][]int, player int) coord {
 
 	b := boardCopy(board)
 
-	v := recminmax(b, coord{0, 0, ""}, player, MAXDEPTH, -10000, 10000, nil)
+	v := recminmax(b, coord{0, 0, ""}, player, MAXDEPTH, -10000, 10000, nil, false)
 
 	//log.Println("THE CHOOSEN ONE : ", v)
 
