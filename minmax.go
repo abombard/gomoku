@@ -1,6 +1,6 @@
 package main
 
-const MAXDEPTH = 3
+const MAXDEPTH = 5
 
 func getPossibleMoveList(b [][]int) []coord {
 
@@ -34,11 +34,12 @@ type step struct {
 	score int
 }
 
-func recminmax(board [][]int, player int, depth int, alpha, beta int) step {
+func recminmax(board [][]int, player int, depth int, alpha, beta int, ch chan step) {
 
 	next := getPossibleMoveList(board)
 	if depth == 0 || len(next) == 0 {
-		return step{score: heuristic2(board)}
+		ch <- step{score: heuristic2(board)}
+		return
 	}
 
 	var v step
@@ -48,6 +49,8 @@ func recminmax(board [][]int, player int, depth int, alpha, beta int) step {
 		v = step{score: 10000}
 	}
 
+	newch := make(chan step, len(next))
+	k := 0
 	for i := range next {
 
 		var newBoard [][]int
@@ -59,12 +62,14 @@ func recminmax(board [][]int, player int, depth int, alpha, beta int) step {
 				continue
 			}
 		}
+		k++
 
 		if len(newBoard) == 0 {
 			newBoard = board
 		}
 
-		tmp := recminmax(newBoard, (player+1)%2, depth-1, alpha, beta)
+		go recminmax(newBoard, (player+1)%2, depth-1, alpha, beta, newch)
+		tmp := <-newch
 		if player == current {
 			if tmp.score > v.score {
 				v.coord = next[i]
@@ -94,7 +99,7 @@ func recminmax(board [][]int, player int, depth int, alpha, beta int) step {
 		board[next[i].X][next[i].Y] = 0
 	}
 
-	return v
+	ch <- v
 }
 
 func boardCopy(board [][]int) [][]int {
@@ -119,9 +124,10 @@ func minmaxRoutine(board [][]int, pt coord, player int, ch chan step) {
 func minmax(board [][]int, player int) coord {
 
 	//nextMoves := getPossibleMoveList(board)
-	//ch := make(chan step, len(nextMoves))
+	ch := make(chan step, 1)
 
-	v := recminmax(board, player, MAXDEPTH, -10000, 10000)
+	recminmax(board, player, MAXDEPTH, -10000, 10000, ch)
+	v := <-ch
 
 	//log.Println("THE CHOOSEN ONE : ", v)
 
