@@ -177,8 +177,8 @@ func getScore(board [][]int, player int) int {
 				}
 
 				score += horScore + verScore + diagScore1 + diagScore2
-				if canBeCaptured(board, x, y, player) {
-					score /= 2
+				if (horScore == 10 || verScore == 10 || diagScore1 == 10 || diagScore2 == 10) && !canBeCaptured(board, x, y, player) {
+					score *= score
 				}
 			}
 		}
