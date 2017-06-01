@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"os"
 	"runtime"
-	"time"
+	//"time"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -163,8 +163,8 @@ func main() {
 		Handler: handlers.LoggingHandler(os.Stdout, r),
 		Addr:    "127.0.0.1:" + port,
 		// Good practice: enforce timeouts for servers you create!
-		WriteTimeout: 15 * time.Second,
-		ReadTimeout:  15 * time.Second,
+		//WriteTimeout: 15 * time.Second,
+		//ReadTimeout:  15 * time.Second,
 	}
 
 	log.Fatal(srv.ListenAndServe())
