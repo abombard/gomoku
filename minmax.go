@@ -1,6 +1,6 @@
 package main
 
-const MAXDEPTH = 3
+const MAXDEPTH = 5
 
 func getPossibleMoveList(b [][]int) []coord {
 
@@ -34,14 +34,15 @@ type step struct {
 	score int
 }
 
-func recminmax(board [][]int, player int, depth int, alpha, beta int, ch chan step) step {
+func recminmax(board [][]int, pt coord, player int, depth int, alpha, beta int, ch chan step) step {
 
 	next := getPossibleMoveList(board)
+	// ERROR depth == MAXDEPTH && len(next) == 0 -> pt = shit
 	if depth == 0 || len(next) == 0 {
 		if ch != nil {
-			ch <- step{score: heuristic2(board)}
+			ch <- step{pt, heuristic2(board)}
 		}
-		return step{score: heuristic2(board)}
+		return step{pt, heuristic2(board)}
 	}
 
 	var v step
@@ -53,54 +54,50 @@ func recminmax(board [][]int, player int, depth int, alpha, beta int, ch chan st
 
 	if depth == MAXDEPTH {
 		newch := make(chan step, len(next))
+
 		k := 0
 		for i := range next {
 
-			var newBoard [][]int
-			err := move(board, next[i], player, &newBoard)
+			b := boardCopy(board)
+
+			err := move(b, next[i], player, &b)
 			if err != nil {
 				if err.Error() == "Game Over" {
 					depth = 1
 				} else {
+					k++
 					continue
 				}
 			}
-			k++
 
-			if len(newBoard) == 0 {
-				newBoard = board
-			}
+			go recminmax(b, next[i], (player+1)%2, depth-1, alpha, beta, newch)
+		}
 
-			b := boardCopy(newBoard)
-			go recminmax(b, (player+1)%2, depth-1, alpha, beta, newch)
+		for i := 0; i < len(next)-k; i++ {
 			tmp := <-newch
 			if player == current {
 				if tmp.score > v.score {
-					v.coord = next[i]
+					v.coord = tmp.coord
 					v.score = tmp.score
 				}
 				if v.score > alpha {
 					alpha = v.score
 					if alpha >= beta {
-						board[next[i].X][next[i].Y] = 0
 						break
 					}
 				}
 			} else {
 				if tmp.score < v.score {
-					v.coord = next[i]
+					v.coord = tmp.coord
 					v.score = tmp.score
 				}
 				if v.score < beta {
 					beta = v.score
 					if alpha >= beta {
-						board[next[i].X][next[i].Y] = 0
 						break
 					}
 				}
 			}
-
-			board[next[i].X][next[i].Y] = 0
 		}
 
 	} else {
@@ -117,14 +114,10 @@ func recminmax(board [][]int, player int, depth int, alpha, beta int, ch chan st
 				}
 			}
 
-			if len(newBoard) == 0 {
-				newBoard = board
-			}
-
-			tmp := recminmax(newBoard, (player+1)%2, depth-1, alpha, beta, nil)
+			tmp := recminmax(newBoard, next[i], (player+1)%2, depth-1, alpha, beta, nil)
 			if player == current {
 				if tmp.score > v.score {
-					v.coord = next[i]
+					v.coord = pt
 					v.score = tmp.score
 				}
 				if v.score > alpha {
@@ -136,7 +129,7 @@ func recminmax(board [][]int, player int, depth int, alpha, beta int, ch chan st
 				}
 			} else {
 				if tmp.score < v.score {
-					v.coord = next[i]
+					v.coord = pt
 					v.score = tmp.score
 				}
 				if v.score < beta {
@@ -182,7 +175,9 @@ func minmax(board [][]int, player int) coord {
 
 	//nextMoves := getPossibleMoveList(board)
 
-	v := recminmax(board, player, MAXDEPTH, -10000, 10000, nil)
+	b := boardCopy(board)
+
+	v := recminmax(b, coord{0, 0, ""}, player, MAXDEPTH, -10000, 10000, nil)
 
 	//log.Println("THE CHOOSEN ONE : ", v)
 

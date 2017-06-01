@@ -225,10 +225,10 @@ func move(b [][]int, c coord, p int, newBoard *[][]int) error {
 	if err != nil {
 		return err
 	}
-	b[x][y] = p + 1
-	if len(*newBoard) > 0 {
-		(*newBoard)[x][y] = p + 1
+	if len(*newBoard) == 0 {
+		*newBoard = b
 	}
+	b[x][y] = p + 1
 	if isGameOver(b, c, p) {
 		return fmt.Errorf("Game Over")
 	}
