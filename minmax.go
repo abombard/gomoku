@@ -38,6 +38,9 @@ func recminmax(board [][]int, player int, depth int, alpha, beta int, ch chan st
 
 	next := getPossibleMoveList(board)
 	if depth == 0 || len(next) == 0 {
+		if ch != nil {
+			ch <- step{score: heuristic2(board)}
+		}
 		return step{score: heuristic2(board)}
 	}
 
@@ -47,6 +50,7 @@ func recminmax(board [][]int, player int, depth int, alpha, beta int, ch chan st
 	} else {
 		v = step{score: 10000}
 	}
+
 	if depth == MAXDEPTH {
 		newch := make(chan step, len(next))
 		k := 0
@@ -67,7 +71,8 @@ func recminmax(board [][]int, player int, depth int, alpha, beta int, ch chan st
 				newBoard = board
 			}
 
-			go recminmax(newBoard, (player+1)%2, depth-1, alpha, beta, newch)
+			b := boardCopy(newBoard)
+			go recminmax(b, (player+1)%2, depth-1, alpha, beta, newch)
 			tmp := <-newch
 			if player == current {
 				if tmp.score > v.score {
@@ -97,7 +102,6 @@ func recminmax(board [][]int, player int, depth int, alpha, beta int, ch chan st
 
 			board[next[i].X][next[i].Y] = 0
 		}
-		ch <- v
 
 	} else {
 
@@ -146,6 +150,10 @@ func recminmax(board [][]int, player int, depth int, alpha, beta int, ch chan st
 
 			board[next[i].X][next[i].Y] = 0
 		}
+	}
+
+	if ch != nil {
+		ch <- v
 	}
 
 	return v

@@ -100,19 +100,20 @@ func play(w http.ResponseWriter, r *http.Request) {
 		}
 	*/
 	err = move(g.Board, t, current, &g.Board)
-	current = (current + 1) % 2
 	if err != nil {
 		log.Println(err)
 		http.Error(w, err.Error(), 400)
 		return
-	}
-	if g.Mode == "solo" {
-		t = aiPlay()
-		err = move(g.Board, t, current, &g.Board)
+	} else {
 		current = (current + 1) % 2
-		if err != nil {
-			log.Fatal("AI", err)
-			return
+		if g.Mode == "solo" {
+			t = aiPlay()
+			err = move(g.Board, t, current, &g.Board)
+			current = (current + 1) % 2
+			if err != nil {
+				log.Fatal("AI", err)
+				return
+			}
 		}
 	}
 	w.Header().Set("Content-Type", "application/json")
