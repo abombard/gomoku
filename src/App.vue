@@ -18,6 +18,12 @@
   			:board="this.board"
   			:cellOnClick="this.play"
   		/>
+  	  	<button
+  	  	  	class="w3-button w3-ripple w3-purple"
+  	  	  	v-on:click="restart()"
+  	  	>
+  	  		Restart
+  	  	</button>
   	</div>
 </template>
 
@@ -57,6 +63,13 @@
 		  	  }, err => {
 		  	  	console.log(`/play ${err.body}`)
 		  	  })
+		  },
+	  	  restart: function () {
+			Vue.http.get('/reset').then(response => {
+				this.updateBoard(response)
+			}, err => {
+				console.log(`/reset ${err.body}`)
+			})
 		  },
 	  }
 	}

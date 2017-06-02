@@ -52,7 +52,9 @@ func resetBoard() {
 func reset(w http.ResponseWriter, r *http.Request) {
 	resetBoard()
 	current = 0
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
+	json.NewEncoder(w).Encode(g.Board)
 }
 
 func startGame(w http.ResponseWriter, r *http.Request) {
@@ -137,7 +139,7 @@ func main() {
 
 	flag.StringVar(&entry, "entry", "index.html", "the entrypoint to serve.")
 	flag.StringVar(&static, "static", ".", "the directory to serve static files from.")
-	flag.StringVar(&port, "port", "8000", "the `port` to listen on.")
+	flag.StringVar(&port, "port", "8080", "the `port` to listen on.")
 	flag.Parse()
 
 	r := mux.NewRouter()
