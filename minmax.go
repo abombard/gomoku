@@ -2,16 +2,28 @@ package main
 
 import "log"
 
-const MAXDEPTH = 3
+const MAXDEPTH = 4
 
 func getPossibleMoveList(b [][]int) []coord {
 
 	var coords []coord
 
-	for x := 0; x < HEIGHT; x++ {
-		for y := 0; y < WIDTH; y++ {
-			if isPawnNearby(b, x, y) == true && b[x][y] == 0 {
-				coords = append(coords, coord{X: x, Y: y})
+	/*
+		for x := 0; x < HEIGHT; x++ {
+			for y := 0; y < WIDTH; y++ {
+				if isEmpty(b[x][y]) && isPawnNearby2(b, x, y) == true {
+					coords = append(coords, coord{X: x, Y: y})
+				}
+			}
+		}
+	*/
+
+	if len(coords) == 0 {
+		for x := 0; x < HEIGHT; x++ {
+			for y := 0; y < WIDTH; y++ {
+				if isEmpty(b[x][y]) && isPawnNearby(b, x, y) == true {
+					coords = append(coords, coord{X: x, Y: y})
+				}
 			}
 		}
 	}
@@ -65,9 +77,10 @@ func recminmax(board [][]int, pt coord, player int, depth int, alpha, beta int, 
 		k := 0
 		for i := range next {
 
+			gameOver := false
+
 			b := boardCopy(board)
 
-			gameOver := false
 			err := move(b, next[i], player, &b)
 			if err != nil {
 				if err.Error() == "Game Over" {
