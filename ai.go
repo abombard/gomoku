@@ -80,3 +80,40 @@ func isPawnNearby2(b [][]int, x0, y0 int) bool {
 
 	return false
 }
+
+func isBetweenPawn(b [][]int, x0, y0 int) bool {
+
+	if isValidCoord(x0-1, y0) && isValidCoord(x0+1, y0) {
+		if !isEmpty(b[x0-1][y0]) && !isEmpty(b[x0+1][y0]) {
+			if b[x0-1][y0] == b[x0+1][y0] {
+				return true
+			}
+		}
+	}
+
+	if isValidCoord(x0, y0-1) && isValidCoord(x0, y0+1) {
+		if !isEmpty(b[x0][y0-1]) && !isEmpty(b[x0][y0+1]) {
+			if b[x0][y0-1] == b[x0][y0-1] {
+				return true
+			}
+		}
+	}
+
+	if isValidCoord(x0-1, y0-1) && isValidCoord(x0+1, y0+1) {
+		if !isEmpty(b[x0-1][y0-1]) && !isEmpty(b[x0+1][y0+1]) {
+			if b[x0-1][y0-1] == b[x0+1][y0+1] {
+				return true
+			}
+		}
+	}
+
+	if isValidCoord(x0-1, y0+1) && isValidCoord(x0+1, y0-1) {
+		if !isEmpty(b[x0-1][y0+1]) && !isEmpty(b[x0+1][y0-1]) {
+			if b[x0-1][y0+1] == b[x0+1][y0-1] {
+				return true
+			}
+		}
+	}
+
+	return false
+}
