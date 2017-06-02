@@ -19,6 +19,7 @@ func maxval(a, b, c, d int) int {
 	return best
 }
 
+/*
 func getScore(board [][]int, player int) int {
 	score := 0
 	for x := 0; x < WIDTH; x++ {
@@ -382,6 +383,116 @@ func getScore(board [][]int, player int) int {
 			}
 		}
 	}
+	return score
+}
+*/
+
+func getScore(board [][]int, player int) int {
+
+	score := 0
+
+	curP := -1
+	curScore := 0
+	curSpacePrev := 0
+	curSpaceNext := 0
+	curMult := 0
+
+	reset := func() {
+		curP = -1
+		curScore = 0
+		curMult = 0
+		curSpacePrev = 0
+		curSpaceNext = 0
+	}
+
+	addScore := func() {
+		if curScore+curSpacePrev+curSpaceNext >= 5 {
+			s := curScore * curScore
+			if isMe(curP, player) {
+				score += s
+			} else {
+				score -= s
+			}
+		}
+		curScore = 0
+		curMult = 1
+	}
+
+	updateScore := func(x, y int) {
+		if !isEmpty(board[x][y]) {
+			if canBeCaptured(board, x, y, board[x][y]) {
+				curMult = 0
+			}
+			curMult += 1
+			if board[x][y] != curP {
+				addScore()
+				curP = board[x][y]
+				curSpacePrev = curSpaceNext
+				curSpaceNext = 0
+			}
+			curScore += curMult
+		} else {
+			if curMult > 0 {
+				curMult -= 1
+			}
+			curSpaceNext += 1
+		}
+	}
+
+	// horizontal
+	for x := 0; x < HEIGHT; x++ {
+		reset()
+		for y := 0; y < WIDTH; y++ {
+			updateScore(x, y)
+		}
+		addScore()
+	}
+
+	// vertical
+	for y := 0; y < WIDTH; y++ {
+		reset()
+		for x := 0; x < HEIGHT; x++ {
+			updateScore(x, y)
+		}
+		addScore()
+	}
+
+	// diagonal 1 from left
+	for x0, y0 := 0, 0; x0 < HEIGHT-4; x0++ {
+		reset()
+		for x, y := x0, y0; x < HEIGHT; x, y = x+1, y+1 {
+			updateScore(x, y)
+		}
+		addScore()
+	}
+
+	// diagonal 1 from top
+	for x0, y0 := 0, 1; y0 < WIDTH-4; y0++ {
+		reset()
+		for x, y := x0, y0; y < WIDTH; x, y = x+1, y+1 {
+			updateScore(x, y)
+		}
+		addScore()
+	}
+
+	// diagonal 2 from left
+	for x0, y0 := 4, 0; x0 < HEIGHT; x0++ {
+		reset()
+		for x, y := x0, y0; x >= 0; x, y = x-1, y+1 {
+			updateScore(x, y)
+		}
+		addScore()
+	}
+
+	// diagonal 2 from bot
+	for x0, y0 := HEIGHT-1, 1; y0 < WIDTH-4; y0++ {
+		reset()
+		for x, y := x0, y0; y < WIDTH; x, y = x-1, y+1 {
+			updateScore(x, y)
+		}
+		addScore()
+	}
+
 	return score
 }
 
