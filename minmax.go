@@ -2,21 +2,19 @@ package main
 
 import "log"
 
-const MAXDEPTH = 3
+const MAXDEPTH = 5
 
 func getPossibleMoveList(b [][]int) []coord {
 
 	var coords []coord
 
-	/*
-		for x := 0; x < HEIGHT; x++ {
-			for y := 0; y < WIDTH; y++ {
-				if isEmpty(b[x][y]) && isPawnNearby2(b, x, y) == true {
-					coords = append(coords, coord{X: x, Y: y})
-				}
+	for x := 0; x < HEIGHT; x++ {
+		for y := 0; y < WIDTH; y++ {
+			if isEmpty(b[x][y]) && isPawnNearby2(b, x, y) == true {
+				coords = append(coords, coord{X: x, Y: y})
 			}
 		}
-	*/
+	}
 
 	if len(coords) == 0 {
 		for x := 0; x < HEIGHT; x++ {
@@ -71,6 +69,45 @@ func recminmax(board [][]int, pt coord, player int, depth int, alpha, beta int, 
 		v = step{score: 1000000}
 	}
 
+	addMove := func(b [][]int, nb *[][]int, c coord, gameOver *bool) error {
+		err := move(b, c, player, nb)
+		if err != nil {
+			if err.Error() == "Game Over" {
+				*gameOver = true
+			} else {
+				return err
+			}
+		}
+		return nil
+	}
+
+	updateVScore := func(score int, c coord, done *bool) {
+		*done = false
+		if player == current {
+			if score > v.score {
+				v.coord = c
+				v.score = score
+			}
+			if score > alpha {
+				alpha = score
+				if alpha >= beta {
+					*done = true
+				}
+			}
+		} else {
+			if score < v.score {
+				v.coord = c
+				v.score = score
+			}
+			if score < beta {
+				beta = score
+				if alpha >= beta {
+					*done = true
+				}
+			}
+		}
+	}
+
 	if depth == MAXDEPTH {
 		newch := make(chan step, len(next))
 
@@ -81,14 +118,9 @@ func recminmax(board [][]int, pt coord, player int, depth int, alpha, beta int, 
 
 			b := boardCopy(board)
 
-			err := move(b, next[i], player, &b)
+			err := addMove(b, &b, next[i], &gameOver)
 			if err != nil {
-				if err.Error() == "Game Over" {
-					gameOver = true
-				} else {
-					k++
-					continue
-				}
+				continue
 			}
 
 			go recminmax(b, next[i], (player+1)%2, depth-1, alpha, beta, newch, gameOver)
@@ -96,29 +128,13 @@ func recminmax(board [][]int, pt coord, player int, depth int, alpha, beta int, 
 
 		for i := 0; i < len(next)-k; i++ {
 			tmp := <-newch
-			if player == current {
-				if tmp.score > v.score {
-					v.coord = tmp.coord
-					v.score = tmp.score
-				}
-				if v.score > alpha {
-					alpha = v.score
-					if alpha >= beta {
-						break
-					}
-				}
-			} else {
-				if tmp.score < v.score {
-					v.coord = tmp.coord
-					v.score = tmp.score
-				}
-				if v.score < beta {
-					beta = v.score
-					if alpha >= beta {
-						break
-					}
-				}
+
+			var done bool
+			updateVScore(tmp.score, tmp.coord, &done)
+			if done {
+				break
 			}
+
 		}
 
 	} else {
@@ -128,43 +144,20 @@ func recminmax(board [][]int, pt coord, player int, depth int, alpha, beta int, 
 			gameOver := false
 
 			var newBoard [][]int
-			err := move(board, next[i], player, &newBoard)
+			err := addMove(board, &newBoard, next[i], &gameOver)
 			if err != nil {
-				if err.Error() == "Game Over" {
-					gameOver = true
-				} else {
-					continue
-				}
+				continue
 			}
 
 			tmp := recminmax(newBoard, next[i], (player+1)%2, depth-1, alpha, beta, nil, gameOver)
-			if player == current {
-				if tmp.score > v.score {
-					v.coord = pt
-					v.score = tmp.score
-				}
-				if v.score > alpha {
-					alpha = v.score
-					if alpha >= beta {
-						board[next[i].X][next[i].Y] = 0
-						break
-					}
-				}
-			} else {
-				if tmp.score < v.score {
-					v.coord = pt
-					v.score = tmp.score
-				}
-				if v.score < beta {
-					beta = v.score
-					if alpha >= beta {
-						board[next[i].X][next[i].Y] = 0
-						break
-					}
-				}
-			}
 
+			var done bool
+			updateVScore(tmp.score, pt, &done)
 			board[next[i].X][next[i].Y] = 0
+
+			if done {
+				break
+			}
 		}
 	}
 
@@ -186,17 +179,7 @@ func boardCopy(board [][]int) [][]int {
 	return b
 }
 
-func minmaxRoutine(board [][]int, pt coord, player int, ch chan step) {
-
-	// create a new slice for each go routine
-	//b := boardCopy(board)
-
-	//ch <- recminmax(b, pt, player, MAXDEPTH, -10000, 10000)
-}
-
 func minmax(board [][]int, player int) coord {
-
-	//nextMoves := getPossibleMoveList(board)
 
 	b := boardCopy(board)
 

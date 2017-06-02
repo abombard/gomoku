@@ -405,24 +405,21 @@ func getScore(board [][]int, player int) int {
 		curSpaceNext = 0
 	}
 
-	addScore := func() {
+	calculScore := func() int {
 		s := curScore * curMult
 		if curScore+curSpacePrev+curSpaceNext >= 5 {
-			s = s * s
+			if curScore >= 4 {
+				s *= s
+			}
 		}
-		if isMe(curP, player) {
-			score += s
-		} else {
-			score -= s
+		if isEnemy(curP, player) {
+			s = -s
 		}
+		return s
 	}
 
 	updateScore := func(x, y int) {
 		if !isEmpty(board[x][y]) {
-			if canBeCaptured(board, x, y, board[x][y]) {
-				curMult = 0
-			}
-			curMult += 1
 			if board[x][y] != curP {
 				curScore = 0
 				curMult = 1
@@ -430,13 +427,20 @@ func getScore(board [][]int, player int) int {
 				curSpacePrev = curSpaceNext
 				curSpaceNext = 0
 			}
-			curScore += curMult
-			addScore()
+			if canBeCaptured(board, x, y, board[x][y]) {
+				curMult = 0
+			}
+			curMult += 1
+			curScore += 1
 		} else {
 			if curMult > 0 {
-				curMult -= 1
+				curMult /= 2
 			}
 			curSpaceNext += 1
+		}
+		score += calculScore()
+		if curScore+curSpaceNext > 5 {
+			curScore = 0
 		}
 	}
 
