@@ -391,6 +391,8 @@ func getScore(board [][]int, player int) int {
 
 	score := 0
 
+	addScore := 0
+
 	curP := -1
 	curScore := 0
 	curSpacePrev := 0
@@ -398,6 +400,7 @@ func getScore(board [][]int, player int) int {
 	curMult := 0
 
 	reset := func() {
+		addScore = 0
 		curP = -1
 		curScore = 0
 		curMult = 0
@@ -410,13 +413,16 @@ func getScore(board [][]int, player int) int {
 		if curScore == curMult {
 			s *= curMult
 		}
-		if curScore+curSpacePrev+curSpaceNext >= 5 {
-			s *= s
-		}
 		if isEnemy(curP, player) {
 			s = -s
 		}
-		return s
+		addScore += s
+		if curScore+curSpacePrev+curSpaceNext >= 5 {
+			s = addScore
+			addScore = 0
+			return addScore
+		}
+		return 0
 	}
 
 	updateScore := func(x, y int) {

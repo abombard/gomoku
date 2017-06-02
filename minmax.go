@@ -10,7 +10,7 @@ func getPossibleMoveList(b [][]int) []coord {
 
 	for x := 0; x < HEIGHT; x++ {
 		for y := 0; y < WIDTH; y++ {
-			if isEmpty(b[x][y]) && isPawnNearby2(b, x, y) {
+			if isEmpty(b[x][y]) && (isPawnNearby2(b, x, y) || isBetweenPawn(b, x, y)) {
 				coords = append(coords, coord{X: x, Y: y})
 			}
 		}

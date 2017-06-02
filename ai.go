@@ -93,7 +93,7 @@ func isBetweenPawn(b [][]int, x0, y0 int) bool {
 
 	if isValidCoord(x0, y0-1) && isValidCoord(x0, y0+1) {
 		if !isEmpty(b[x0][y0-1]) && !isEmpty(b[x0][y0+1]) {
-			if b[x0][y0-1] == b[x0][y0-1] {
+			if b[x0][y0-1] == b[x0][y0+1] {
 				return true
 			}
 		}
