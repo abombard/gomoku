@@ -49,6 +49,8 @@ func resetBoard() {
 	}
 }
 
+var iaPlaying = false
+
 func reset(w http.ResponseWriter, r *http.Request) {
 	resetBoard()
 	current = 0
@@ -58,6 +60,11 @@ func reset(w http.ResponseWriter, r *http.Request) {
 }
 
 func getBoard(w http.ResponseWriter, r *http.Request) {
+  if iaPlaying {
+		http.Error(w, "AI PLAYING", 400)
+		return
+
+  }
 	if g.Mode == "" {
 		http.Error(w, "No mode selected yet", 400)
 		return
@@ -69,12 +76,6 @@ func getBoard(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	defer r.Body.Close()
-	/*
-		if t.Player != players[current] {
-			http.Error(w, "Not your turn bitch", 400)
-			return
-		}
-	*/
 	err = move(g.Board, t, current, &g.Board)
 	if err != nil {
 		log.Println(err)
@@ -134,17 +135,20 @@ func play(w http.ResponseWriter, r *http.Request) {
 		}
 	*/
 		if g.Mode == "solo" {
+			iaPlaying = true
 			t = aiPlay()
 			err = move(g.Board, t, current, &g.Board)
 			current = (current + 1) % 2
 			if err != nil {
 				log.Fatal("AI", err)
+			iaPlaying = false
 				return
 			}
 		}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	json.NewEncoder(w).Encode(g.Board)
+		  iaPlaying = false
 }
 
 func main() {
