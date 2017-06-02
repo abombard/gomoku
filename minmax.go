@@ -2,7 +2,7 @@ package main
 
 import "log"
 
-const MAXDEPTH = 4
+const MAXDEPTH = 3
 
 func getPossibleMoveList(b [][]int) []coord {
 
