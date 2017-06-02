@@ -81,6 +81,10 @@ func getBoard(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	defer r.Body.Close()
+		if t.Player != players[current] {
+			http.Error(w, "Not your turn bitch", 400)
+			return
+		}
 	err = move(g.Board, t, current, &g.Board)
 	if err != nil {
 		log.Println(err)
@@ -133,12 +137,6 @@ func play(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	defer r.Body.Close()
-	/*
-		if t.Player != players[current] {
-			http.Error(w, "Not your turn bitch", 400)
-			return
-		}
-	*/
 		if g.Mode == "solo" {
 			iaPlaying = true
 			t = aiPlay()
