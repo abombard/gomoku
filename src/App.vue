@@ -18,6 +18,12 @@
   			:board="this.board"
   			:cellOnClick="this.play"
   		/>
+  	  	<button
+  	  	  	class="w3-button w3-ripple w3-purple"
+  	  	  	v-on:click="restart()"
+  	  	>
+  	  		Restart
+  	  	</button>
   	</div>
 </template>
 
@@ -52,11 +58,23 @@
 			})
 		  },
 		  play: function (x, y) {
+		  	  Vue.http.post('/getboard', { x:x, y:y, player:this.id }).then(response => {
+				this.updateBoard(response)
+		  	  }, err => {
+		  	  	console.log(`/play ${err.body}`)
+		  	  })
 		  	  Vue.http.post('/play', { x:x, y:y, player:this.id }).then(response => {
 				this.updateBoard(response)
 		  	  }, err => {
 		  	  	console.log(`/play ${err.body}`)
 		  	  })
+		  },
+	  	  restart: function () {
+			Vue.http.get('/reset').then(response => {
+				this.updateBoard(response)
+			}, err => {
+				console.log(`/reset ${err.body}`)
+			})
 		  },
 	  }
 	}

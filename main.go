@@ -52,7 +52,40 @@ func resetBoard() {
 func reset(w http.ResponseWriter, r *http.Request) {
 	resetBoard()
 	current = 0
+	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
+	json.NewEncoder(w).Encode(g.Board)
+}
+
+func getBoard(w http.ResponseWriter, r *http.Request) {
+	if g.Mode == "" {
+		http.Error(w, "No mode selected yet", 400)
+		return
+	}
+	decoder := json.NewDecoder(r.Body)
+	var t coord
+	err := decoder.Decode(&t)
+	if err != nil {
+		panic(err)
+	}
+	defer r.Body.Close()
+	/*
+		if t.Player != players[current] {
+			http.Error(w, "Not your turn bitch", 400)
+			return
+		}
+	*/
+	err = move(g.Board, t, current, &g.Board)
+	if err != nil {
+		log.Println(err)
+		http.Error(w, err.Error(), 400)
+		return
+	} else {
+		current = (current + 1) % 2
+	}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	json.NewEncoder(w).Encode(g.Board)
 }
 
 func startGame(w http.ResponseWriter, r *http.Request) {
@@ -100,13 +133,6 @@ func play(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 	*/
-	err = move(g.Board, t, current, &g.Board)
-	if err != nil {
-		log.Println(err)
-		http.Error(w, err.Error(), 400)
-		return
-	} else {
-		current = (current + 1) % 2
 		if g.Mode == "solo" {
 			t = aiPlay()
 			err = move(g.Board, t, current, &g.Board)
@@ -116,7 +142,6 @@ func play(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		}
-	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	json.NewEncoder(w).Encode(g.Board)
@@ -137,7 +162,7 @@ func main() {
 
 	flag.StringVar(&entry, "entry", "index.html", "the entrypoint to serve.")
 	flag.StringVar(&static, "static", ".", "the directory to serve static files from.")
-	flag.StringVar(&port, "port", "8000", "the `port` to listen on.")
+	flag.StringVar(&port, "port", "8080", "the `port` to listen on.")
 	flag.Parse()
 
 	r := mux.NewRouter()
@@ -149,6 +174,7 @@ func main() {
 	//	api := r.PathPrefix("/api/v1/").Subrouter()
 	r.HandleFunc("/startgame", startGame).Methods("POST")
 	r.HandleFunc("/play", play).Methods("POST")
+	r.HandleFunc("/getboard", getBoard).Methods("POST")
 	r.HandleFunc("/reset", reset).Methods("GET")
 	// Optional: Use a custom 404 handler for our API paths.
 	// api.NotFoundHandler = JSONNotFound
