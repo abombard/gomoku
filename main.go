@@ -157,6 +157,7 @@ func play(w http.ResponseWriter, r *http.Request) {
 			current = (current + 1) % 2
 			if err != nil {
 			  if err.Error() == "Game Over" {
+				lost = true
 				w.WriteHeader(201)
 			  } else {
 				http.Error(w, err.Error(), 400)
