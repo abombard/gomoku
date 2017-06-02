@@ -19,8 +19,7 @@ func maxval(a, b, c, d int) int {
 	return best
 }
 
-/*
-func getScore(board [][]int, player int) int {
+func getScore1(board [][]int, player int) int {
 	score := 0
 	for x := 0; x < WIDTH; x++ {
 		for y := 0; y < HEIGHT; y++ {
@@ -385,7 +384,6 @@ func getScore(board [][]int, player int) int {
 	}
 	return score
 }
-*/
 
 func getScore(board [][]int, player int) int {
 
@@ -405,12 +403,15 @@ func getScore(board [][]int, player int) int {
 
 	calcScore := func(curScore int) int {
 		if curScore+curSpacePrev+curSpaceNext >= 5 {
-			curScore *= curScore
+			if curScore >= 5 {
+				curScore *= curScore * curScore
+			}
+			if isEnemy(curP, player) {
+				curScore = -curScore
+			}
+			return curScore
 		}
-		if isEnemy(curP, player) {
-			curScore = -curScore
-		}
-		return curScore
+		return 0
 	}
 
 	updateScore := func(x, y int) {
@@ -422,18 +423,32 @@ func getScore(board [][]int, player int) int {
 				curSpacePrev = curSpaceNext
 				curSpaceNext = 0
 			} else {
+				curScore -= curSpaceNext
 				curSpacePrev += curSpaceNext
 				curSpaceNext = 0
 			}
-			curScore += 1
 			if canBeCaptured(board, x, y, board[x][y]) {
 				score += calcScore(curScore)
 				curScore = 0
 				curSpacePrev = 0
 				curSpaceNext = 0
+			} else {
+				curScore += 1
+				if curScore == 5 {
+					score += calcScore(curScore)
+					curScore = 0
+					curSpacePrev = 0
+					curSpaceNext = 0
+				}
 			}
 		} else {
-			curScore -= 1
+			s := calcScore(curScore)
+			if s != 0 {
+				score += s
+				curScore = 0
+				curSpacePrev = curSpaceNext
+				curSpaceNext = 0
+			}
 			curSpaceNext += 1
 		}
 	}
@@ -496,7 +511,7 @@ func getScore(board [][]int, player int) int {
 }
 
 func heuristic2(board [][]int) int {
-	score := getScore(board, current)
+	score := getScore1(board, current)
 	/*
 		log.Println("heuristic", scoreFinal)
 		printBoard(board)
