@@ -187,7 +187,7 @@ func main() {
 
 	flag.StringVar(&entry, "entry", "index.html", "the entrypoint to serve.")
 	flag.StringVar(&static, "static", ".", "the directory to serve static files from.")
-	flag.StringVar(&port, "port", "8080", "the `port` to listen on.")
+	flag.StringVar(&port, "port", "3004", "the `port` to listen on.")
 	flag.Parse()
 
 	r := mux.NewRouter()
@@ -213,7 +213,7 @@ func main() {
 
 	srv := &http.Server{
 		Handler: handlers.LoggingHandler(os.Stdout, r),
-		Addr:    "127.0.0.1:" + port,
+		Addr:    "0.0.0.0:" + port,
 		// Good practice: enforce timeouts for servers you create!
 		//WriteTimeout: 15 * time.Second,
 		//ReadTimeout:  15 * time.Second,
