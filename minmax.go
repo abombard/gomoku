@@ -54,6 +54,9 @@ func recminmax(board [][]int, pt coord, player int, depth int, alpha, beta int, 
 		log.Fatal("depth == MAXDEPTH && len(next) == 0: GAME OVER")
 	}
 	if depth == 0 || gameOver || len(next) == 0 {
+		if gameOver {
+			depth += 1
+		}
 		score := (depth + 1) * heuristic2(board)
 		ret := step{pt, score}
 		if ch != nil {

@@ -417,7 +417,10 @@ func getScore(board [][]int, player int) int {
 			s = -s
 		}
 		addScore += s
-		if curScore+curSpacePrev+curSpaceNext >= 5 {
+		if curScore+curSpacePrev+curSpaceNext >= 4 {
+			if curScore == curMult {
+				addScore += addScore
+			}
 			s = addScore
 			addScore = 0
 			return addScore
