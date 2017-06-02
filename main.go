@@ -150,7 +150,7 @@ func play(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	defer r.Body.Close()
-		if g.Mode == "solo" {
+		if g.Mode == "solo" && lost == false {
 			iaPlaying = true
 			t = aiPlay()
 			err = move(g.Board, t, current, &g.Board)
