@@ -120,6 +120,7 @@ func recminmax(board [][]int, pt coord, player int, depth int, alpha, beta int, 
 
 			err := addMove(b, &b, next[i], &gameOver)
 			if err != nil {
+				k++
 				continue
 			}
 
