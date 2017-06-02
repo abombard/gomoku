@@ -10,7 +10,7 @@ func getPossibleMoveList(b [][]int) []coord {
 
 	for x := 0; x < HEIGHT; x++ {
 		for y := 0; y < WIDTH; y++ {
-			if isEmpty(b[x][y]) && isPawnNearby2(b, x, y) == true {
+			if isEmpty(b[x][y]) && isPawnNearby2(b, x, y) {
 				coords = append(coords, coord{X: x, Y: y})
 			}
 		}
@@ -19,7 +19,7 @@ func getPossibleMoveList(b [][]int) []coord {
 	if len(coords) == 0 {
 		for x := 0; x < HEIGHT; x++ {
 			for y := 0; y < WIDTH; y++ {
-				if isEmpty(b[x][y]) && isPawnNearby(b, x, y) == true {
+				if isEmpty(b[x][y]) && isPawnNearby(b, x, y) {
 					coords = append(coords, coord{X: x, Y: y})
 				}
 			}
@@ -64,9 +64,9 @@ func recminmax(board [][]int, pt coord, player int, depth int, alpha, beta int, 
 
 	var v step
 	if player == current {
-		v = step{score: -1000000}
+		v = step{score: -10000000}
 	} else {
-		v = step{score: 1000000}
+		v = step{score: 10000000}
 	}
 
 	addMove := func(b [][]int, nb *[][]int, c coord, gameOver *bool) error {

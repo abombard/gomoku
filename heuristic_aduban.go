@@ -406,11 +406,12 @@ func getScore(board [][]int, player int) int {
 	}
 
 	calculScore := func() int {
-		s := curScore * curMult
+		s := curScore
+		if curScore == curMult {
+			s *= curMult
+		}
 		if curScore+curSpacePrev+curSpaceNext >= 5 {
-			if curScore >= 4 {
-				s *= s
-			}
+			s *= s
 		}
 		if isEnemy(curP, player) {
 			s = -s
