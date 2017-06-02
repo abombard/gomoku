@@ -6,10 +6,10 @@
 				v-for="(cell, y) in row"
 				v-on:click="cellOnClick(x, y)">
 				<div v-if="cell==1" class="CellText w3-green">
-					{{ cell }}
+					{{  }}
 				</div>
 				<div v-else-if="cell==2" class="CellText w3-indigo">
-   					{{ cell }}
+   					{{  }}
    				</div>
    			</div>
    		</div>
