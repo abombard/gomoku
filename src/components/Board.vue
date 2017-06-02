@@ -19,7 +19,7 @@
 <script>
 
 	export default {
-		props: ['board', 'cellOnClick'],
+		props: ['board', 'cellOnClick', 'win'],
 	}
 
 </script>

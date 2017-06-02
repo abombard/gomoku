@@ -50,8 +50,10 @@ func resetBoard() {
 }
 
 var iaPlaying = false
+var lost = false
 
 func reset(w http.ResponseWriter, r *http.Request) {
+  lost = false
 	resetBoard()
 	current = 0
 	w.Header().Set("Content-Type", "application/json")
@@ -60,6 +62,12 @@ func reset(w http.ResponseWriter, r *http.Request) {
 }
 
 func board(w http.ResponseWriter, r *http.Request) {
+	if lost {
+				w.WriteHeader(202)
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(g.Board)
+				return
+	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	json.NewEncoder(w).Encode(g.Board)
@@ -88,7 +96,12 @@ func getBoard(w http.ResponseWriter, r *http.Request) {
 	err = move(g.Board, t, current, &g.Board)
 	if err != nil {
 		log.Println(err)
-		http.Error(w, err.Error(), 400)
+			  if err.Error() == "Game Over" {
+				lost = true
+				w.WriteHeader(201)
+			  } else {
+				http.Error(w, err.Error(), 400)
+			  }
 		return
 	} else {
 		current = (current + 1) % 2
@@ -143,8 +156,12 @@ func play(w http.ResponseWriter, r *http.Request) {
 			err = move(g.Board, t, current, &g.Board)
 			current = (current + 1) % 2
 			if err != nil {
-				log.Fatal("AI", err)
-			iaPlaying = false
+			  if err.Error() == "Game Over" {
+				w.WriteHeader(201)
+			  } else {
+				http.Error(w, err.Error(), 400)
+			  }
+				iaPlaying = false
 				return
 			}
 		}
