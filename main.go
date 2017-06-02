@@ -59,6 +59,11 @@ func reset(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(g.Board)
 }
 
+func board(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	json.NewEncoder(w).Encode(g.Board)
+}
 func getBoard(w http.ResponseWriter, r *http.Request) {
   if iaPlaying {
 		http.Error(w, "AI PLAYING", 400)
@@ -180,6 +185,7 @@ func main() {
 	r.HandleFunc("/play", play).Methods("POST")
 	r.HandleFunc("/getboard", getBoard).Methods("POST")
 	r.HandleFunc("/reset", reset).Methods("GET")
+	r.HandleFunc("/board", board).Methods("GET")
 	// Optional: Use a custom 404 handler for our API paths.
 	// api.NotFoundHandler = JSONNotFound
 
