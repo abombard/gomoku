@@ -60,13 +60,14 @@
 		  play: function (x, y) {
 		  	  Vue.http.post('/getboard', { x:x, y:y, player:this.id }).then(response => {
 				this.updateBoard(response)
-		  	  }, err => {
-		  	  	console.log(`/play ${err.body}`)
-		  	  })
 		  	  Vue.http.post('/play', { x:x, y:y, player:this.id }).then(response => {
 				this.updateBoard(response)
 		  	  }, err => {
 		  	  	console.log(`/play ${err.body}`)
+		  	  })
+		  	  }, err => {
+		  	  	console.log(`/getboard ${err.body}`)
+                return
 		  	  })
 		  },
 	  	  restart: function () {
