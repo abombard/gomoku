@@ -391,66 +391,50 @@ func getScore(board [][]int, player int) int {
 
 	score := 0
 
-	addScore := 0
-
 	curP := -1
 	curScore := 0
 	curSpacePrev := 0
 	curSpaceNext := 0
-	curMult := 0
 
 	reset := func() {
-		addScore = 0
 		curP = -1
 		curScore = 0
-		curMult = 0
 		curSpacePrev = 0
 		curSpaceNext = 0
 	}
 
-	calculScore := func() int {
-		s := curScore
+	calcScore := func(curScore int) int {
+		if curScore+curSpacePrev+curSpaceNext >= 5 {
+			curScore *= curScore
+		}
 		if isEnemy(curP, player) {
-			s = -s
+			curScore = -curScore
 		}
-		addScore += s
-		if curScore+curSpacePrev+curSpaceNext >= 4 {
-			if curScore == curMult {
-				addScore += addScore
-				if curScore >= 4 {
-					addScore += addScore
-				}
-			}
-			s = addScore
-			addScore = 0
-			return addScore
-		}
-		return 0
+		return curScore
 	}
 
 	updateScore := func(x, y int) {
 		if !isEmpty(board[x][y]) {
 			if board[x][y] != curP {
+				score += calcScore(curScore)
 				curScore = 0
-				curMult = 1
 				curP = board[x][y]
 				curSpacePrev = curSpaceNext
 				curSpaceNext = 0
+			} else {
+				curSpacePrev += curSpaceNext
+				curSpaceNext = 0
 			}
-			if canBeCaptured(board, x, y, board[x][y]) {
-				curMult = 0
-			}
-			curMult += 1
 			curScore += 1
-		} else {
-			if curMult > 0 {
-				curMult /= 2
+			if canBeCaptured(board, x, y, board[x][y]) {
+				score += calcScore(curScore)
+				curScore = 0
+				curSpacePrev = 0
+				curSpaceNext = 0
 			}
+		} else {
+			curScore -= 1
 			curSpaceNext += 1
-		}
-		score += calculScore()
-		if curScore+curSpaceNext > 5 {
-			curScore = 0
 		}
 	}
 
@@ -460,6 +444,7 @@ func getScore(board [][]int, player int) int {
 		for y := 0; y < WIDTH; y++ {
 			updateScore(x, y)
 		}
+		score += calcScore(curScore)
 	}
 
 	// vertical
@@ -468,6 +453,7 @@ func getScore(board [][]int, player int) int {
 		for x := 0; x < HEIGHT; x++ {
 			updateScore(x, y)
 		}
+		score += calcScore(curScore)
 	}
 
 	// diagonal 1 from left
@@ -476,6 +462,7 @@ func getScore(board [][]int, player int) int {
 		for x, y := x0, y0; x < HEIGHT; x, y = x+1, y+1 {
 			updateScore(x, y)
 		}
+		score += calcScore(curScore)
 	}
 
 	// diagonal 1 from top
@@ -484,6 +471,7 @@ func getScore(board [][]int, player int) int {
 		for x, y := x0, y0; y < WIDTH; x, y = x+1, y+1 {
 			updateScore(x, y)
 		}
+		score += calcScore(curScore)
 	}
 
 	// diagonal 2 from left
@@ -492,6 +480,7 @@ func getScore(board [][]int, player int) int {
 		for x, y := x0, y0; x >= 0; x, y = x-1, y+1 {
 			updateScore(x, y)
 		}
+		score += calcScore(curScore)
 	}
 
 	// diagonal 2 from bot
@@ -500,6 +489,7 @@ func getScore(board [][]int, player int) int {
 		for x, y := x0, y0; y < WIDTH; x, y = x-1, y+1 {
 			updateScore(x, y)
 		}
+		score += calcScore(curScore)
 	}
 
 	return score
