@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"os"
 	"runtime"
-	//"time"
+	"time"
 
 	"github.com/gorilla/handlers"
 	"github.com/gorilla/mux"
@@ -21,6 +21,7 @@ const (
 type Gomoku struct {
 	Board [][]int
 	Mode  string
+	Time	 time.Duration
 }
 
 var g Gomoku
@@ -152,7 +153,9 @@ func play(w http.ResponseWriter, r *http.Request) {
 	defer r.Body.Close()
 		if g.Mode == "solo" && lost == false {
 			iaPlaying = true
+			start := time.Now()
 			t = aiPlay()
+			g.Time = (time.Since(start) / 1000000)
 			err = move(g.Board, t, current, &g.Board)
 			current = (current + 1) % 2
 			if err != nil {
@@ -168,7 +171,7 @@ func play(w http.ResponseWriter, r *http.Request) {
 		}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
-	json.NewEncoder(w).Encode(g.Board)
+	json.NewEncoder(w).Encode(g)
 		  iaPlaying = false
 }
 

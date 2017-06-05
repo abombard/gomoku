@@ -18,6 +18,9 @@
   			:board="this.board"
   			:cellOnClick="this.play"
   		/>
+        <div v-if="time!=0">
+        <p> <span class="w3-badge w3-green">{{this.time}} ms</span></p>
+        </div>
           <div v-if="win==true" class="w3-panel w3-green" align="center">
           YOU WON !
         </div>
@@ -49,7 +52,8 @@
   	  		id: (Math.random() % 255).toString(),
   	  		board: undefined,
             win: false,
-          lost: false
+          lost: false,
+          time: 0
       	}
   	  },
 
@@ -83,6 +87,14 @@
 				  console.log(`res.json() ${err.body}`);
 			  });
 	  	  },
+	  	  updateBoardAndTime: function (res) {
+	  	  	  res.json().then(newBoard => {
+	  	  	  	  this.board = newBoard.Board;
+	  	  	  	  this.time = newBoard.Time;
+	  	  	  }, err => {
+				  console.log(`res.json() ${err.body}`);
+			  });
+	  	  },
 	  	  startGame: function (mode) {
 			console.log(`startGame ${mode}`);
 			Vue.http.post('/startgame', { mode:mode, player:this.id }).then(response => {
@@ -102,7 +114,7 @@
                 }
 				this.updateBoard(response)
                 Vue.http.post('/play', { x:x, y:y, player:this.id }).then(response => {
-                  this.updateBoard(response)
+                  this.updateBoardAndTime(response)
                 }, err => {
                   console.log(`/play ${err.body}`)
 		  	  })
