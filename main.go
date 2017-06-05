@@ -172,6 +172,24 @@ func play(w http.ResponseWriter, r *http.Request) {
 		  iaPlaying = false
 }
 
+func hint(w http.ResponseWriter, r *http.Request) {
+	if g.Mode == "" {
+		http.Error(w, "No mode selected yet", 400)
+		return
+	}
+	var t coord
+		if lost == false {
+			iaPlaying = true
+			t = aiPlay()
+			g.Board[t.X][t.Y] = -1
+		}
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	json.NewEncoder(w).Encode(g.Board)
+		  g.Board[t.X][t.Y] = 0
+		iaPlaying = false
+}
+
 func main() {
 	/*
 		TESTHEURISTIC()
@@ -202,6 +220,7 @@ func main() {
 	r.HandleFunc("/getboard", getBoard).Methods("POST")
 	r.HandleFunc("/reset", reset).Methods("GET")
 	r.HandleFunc("/board", board).Methods("GET")
+	r.HandleFunc("/hint", hint).Methods("GET")
 	// Optional: Use a custom 404 handler for our API paths.
 	// api.NotFoundHandler = JSONNotFound
 

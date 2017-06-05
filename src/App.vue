@@ -30,6 +30,12 @@
   	  	>
   	  		Restart
   	  	</button>
+  	  	<button
+  	  	  	class="w3-button w3-ripple w3-blue"
+  	  	  	v-on:click="hint()"
+  	  	>
+  	  		Hint
+  	  	</button>
   	</div>
 </template>
 
@@ -58,6 +64,16 @@
                 }
 			}, err => {
 				console.log(`/board ${err.body}`)
+			})
+              },
+        hint: function () {
+			Vue.http.get('/hint').then(response => {
+				this.updateBoard(response)
+                if (response.status === 202 && !this.win) {
+                  this.lost = true
+                }
+			}, err => {
+				console.log(`/hint ${err.body}`)
 			})
               },
 	  	  updateBoard: function (res) {
