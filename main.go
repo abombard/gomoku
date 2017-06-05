@@ -162,6 +162,7 @@ func play(w http.ResponseWriter, r *http.Request) {
 			  if err.Error() == "Game Over" {
 				lost = true
 				w.WriteHeader(201)
+				json.NewEncoder(w).Encode(g)
 			  } else {
 				http.Error(w, err.Error(), 400)
 			  }
