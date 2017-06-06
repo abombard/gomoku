@@ -59,14 +59,17 @@ func introduceDoubleThree(b [][]int, x, y int, p int) bool {
 		blank := 0
 		for j := 0; j < len(checks[i]); j++ {
 			if j == 4 {
+				if count == 0 {
+					blank = 0
+				}
 				count += 1
 			}
 			x1, y1 := x+checks[i][j][0], y+checks[i][j][1]
+			if count == 3 {
+				nextOk = isValidCoord(x1, y1) && isEmpty(b[x1][y1])
+				break
+			}
 			if isValidCoord(x1, y1) {
-				if count == 3 {
-					nextOk = isEmpty(b[x][y])
-					break
-				}
 				if isMe(b[x1][y1], p) {
 					if count == 0 {
 						blank = 0
