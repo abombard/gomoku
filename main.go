@@ -19,15 +19,19 @@ const (
 )
 
 type Gomoku struct {
-	Board [][]int
-	Mode  string
-	Time  time.Duration
+	Board   [][]int
+	Mode    string
+	Time    time.Duration
+	Players [2]player
 }
 
 var g Gomoku
-var players [2]string
 var current int = 0
 
+type player struct {
+	Name  string
+	Score int
+}
 type coord struct {
 	X      int
 	Y      int
@@ -57,21 +61,23 @@ func reset(w http.ResponseWriter, r *http.Request) {
 	lost = false
 	resetBoard()
 	current = 0
+	g.Players[0].Score = 0
+	g.Players[1].Score = 0
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
-	json.NewEncoder(w).Encode(g.Board)
+	json.NewEncoder(w).Encode(g)
 }
 
 func board(w http.ResponseWriter, r *http.Request) {
 	if lost {
 		w.WriteHeader(202)
 		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(g.Board)
+		json.NewEncoder(w).Encode(g)
 		return
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
-	json.NewEncoder(w).Encode(g.Board)
+	json.NewEncoder(w).Encode(g)
 }
 func getBoard(w http.ResponseWriter, r *http.Request) {
 	if iaPlaying {
@@ -90,11 +96,16 @@ func getBoard(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	defer r.Body.Close()
-	if t.Player != players[current] {
+	if t.Player != g.Players[current].Name {
 		http.Error(w, "Not your turn bitch", 400)
 		return
 	}
+	nb := countEnnemyPawns(g.Board, current)
 	err = move(g.Board, t, current, &g.Board)
+	end := countEnnemyPawns(g.Board, current)
+	if end == nb+2 {
+		g.Players[current].Score += 2
+	}
 	if err != nil {
 		log.Println(err)
 		if err.Error() == "Game Over" {
@@ -109,7 +120,7 @@ func getBoard(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
-	json.NewEncoder(w).Encode(g.Board)
+	json.NewEncoder(w).Encode(g)
 }
 
 func startGame(w http.ResponseWriter, r *http.Request) {
@@ -124,29 +135,33 @@ func startGame(w http.ResponseWriter, r *http.Request) {
 		lost = false
 		resetBoard()
 		current = 0
+		g.Players[0].Score = 0
+		g.Players[1].Score = 0
 		g.Mode = t.Mode
 	}
 	if g.Mode == "solo" {
-		if players[0] == "" || (players[0] != "" && t.Player != players[0]) {
-			players[0] = t.Player
-			players[1] = "AI"
+		if g.Players[0].Name == "" || (g.Players[0].Name != "" && t.Player != g.Players[0].Name) {
+			g.Players[0].Name = t.Player
+			g.Players[1].Name = "AI"
 		}
 	} else if g.Mode == "multi" {
-		if players[0] == "" {
-			players[0] = t.Player
-		} else if players[1] == "" {
-			players[1] = t.Player
+		if g.Players[0].Name == "" {
+			g.Players[0].Name = t.Player
+		} else if g.Players[1].Name == "" {
+			g.Players[1].Name = t.Player
 		} else {
-			players[0] = t.Player
-			players[1] = ""
+			g.Players[0].Name = t.Player
+			g.Players[1].Name = ""
 			lost = false
 			resetBoard()
 			current = 0
+			g.Players[0].Score = 0
+			g.Players[1].Score = 0
 		}
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
-	json.NewEncoder(w).Encode(g.Board)
+	json.NewEncoder(w).Encode(g)
 
 }
 
@@ -200,7 +215,7 @@ func hint(w http.ResponseWriter, r *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
-	json.NewEncoder(w).Encode(g.Board)
+	json.NewEncoder(w).Encode(g)
 	g.Board[t.X][t.Y] = 0
 	iaPlaying = false
 }

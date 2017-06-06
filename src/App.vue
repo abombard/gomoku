@@ -19,6 +19,8 @@
   			:cellOnClick="this.play"
   		/>
         <div v-if="time!=0">
+        <p> <span class="w3-badge w3-yellow">{{this.score1}} ms</span></p>
+        <p> <span class="w3-badge w3-yellow">{{this.score2}} ms</span></p>
         <p> <span class="w3-badge w3-green">{{this.time}} ms</span></p>
         </div>
           <div v-if="win==true" class="w3-panel w3-green" align="center">
@@ -53,7 +55,9 @@
   	  		board: undefined,
             win: false,
           lost: false,
-          time: 0
+          time: 0,
+          score1: 0,
+          score2: 0
       	}
   	  },
 
@@ -82,15 +86,11 @@
               },
 	  	  updateBoard: function (res) {
 	  	  	  res.json().then(newBoard => {
-	  	  	  	  this.board = newBoard;
-	  	  	  }, err => {
-				  console.log(`res.json() ${err.body}`);
-			  });
-	  	  },
-	  	  updateBoardAndTime: function (res) {
-	  	  	  res.json().then(newBoard => {
 	  	  	  	  this.board = newBoard.Board;
 	  	  	  	  this.time = newBoard.Time;
+                this.score1 = newBoard.Players[0].Score;
+                this.score2 = newBoard.Players[1].Score;
+                  
 	  	  	  }, err => {
 				  console.log(`res.json() ${err.body}`);
 			  });
@@ -114,7 +114,7 @@
                 }
 				this.updateBoard(response)
                 Vue.http.post('/play', { x:x, y:y, player:this.id }).then(response => {
-                  this.updateBoardAndTime(response)
+                  this.updateBoard(response)
                 }, err => {
                   console.log(`/play ${err.body}`)
 		  	  })

@@ -1,6 +1,5 @@
 package main
 
-
 const MAXDEPTH = 5
 
 func getPossibleMoveList(b [][]int) []coord {
@@ -50,8 +49,8 @@ func recminmax(board [][]int, pt coord, player int, depth int, alpha, beta int, 
 	next := getPossibleMoveList(board)
 	// ERROR depth == MAXDEPTH && len(next) == 0 -> pt = shit
 	if depth == MAXDEPTH && len(next) == 0 {
-	  return step{coord: coord{X:10, Y:10}}
-	//	log.Fatal("depth == MAXDEPTH && len(next) == 0: GAME OVER")
+		return step{coord: coord{X: 10, Y: 10}}
+		//	log.Fatal("depth == MAXDEPTH && len(next) == 0: GAME OVER")
 	}
 	if depth == 0 || gameOver || len(next) == 0 {
 		if gameOver {
@@ -183,11 +182,30 @@ func boardCopy(board [][]int) [][]int {
 	return b
 }
 
+func countEnnemyPawns(b [][]int, player int) int {
+	count := 0
+	for x := 0; x < WIDTH; x++ {
+		for y := 0; y < HEIGHT; y++ {
+			if isEnemy(b[x][y], player) {
+				count++
+			}
+		}
+	}
+	return count
+
+}
+
 func minmax(board [][]int, player int) coord {
 
 	b := boardCopy(board)
 
+	nb := countEnnemyPawns(b, player)
+
 	v := recminmax(b, coord{0, 0, ""}, player, MAXDEPTH, -10000, 10000, nil, false)
+	end := countEnnemyPawns(b, player)
+	if end == nb+2 {
+		g.Players[player].Score += 2
+	}
 
 	//log.Println("THE CHOOSEN ONE : ", v)
 
