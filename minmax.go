@@ -182,7 +182,7 @@ func boardCopy(board [][]int) [][]int {
 	return b
 }
 
-func countEnnemyPawns(b [][]int, player int) int {
+func countEnemyPawns(b [][]int, player int) int {
 	count := 0
 	for x := 0; x < WIDTH; x++ {
 		for y := 0; y < HEIGHT; y++ {

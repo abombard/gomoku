@@ -18,11 +18,15 @@
   			:board="this.board"
   			:cellOnClick="this.play"
   		/>
+        <div align="left">
+        <span class="w3-badge  w3-large w3-pink">{{this.score1}} </span>
+        </div>
+        <div align="right">
+        <span class="w3-badge w3-large w3-pink">{{this.score2}} </span>
+        </div>
         <div v-if="time!=0">
         <p> <span class="w3-badge w3-green">{{this.time}} ms</span></p>
         </div>
-        <p> <span class="w3-badge w3-yellow">{{this.score1}} </span></p>
-        <p> <span class="w3-badge w3-yellow">{{this.score2}} </span></p>
           <div v-if="win==true" class="w3-panel w3-green" align="center">
           YOU WON !
         </div>
