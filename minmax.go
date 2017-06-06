@@ -27,18 +27,6 @@ func getPossibleMoveList(b [][]int) []coord {
 	return coords
 }
 
-func isEmptyNew(x, y int, board [][]int, p int) bool {
-	return board[x][y] == 0
-}
-
-func isMeNew(x, y int, board [][]int, player int) bool {
-	return board[x][y] == player+1
-}
-
-func isEnemyNew(x, y int, board [][]int, player int) bool {
-	return !isEmptyNew(x, y, board, player) && board[x][y] != player+1
-}
-
 type step struct {
 	coord coord
 	score int
@@ -56,7 +44,7 @@ func recminmax(board [][]int, pt coord, player int, depth int, alpha, beta int, 
 		if gameOver {
 			depth += 1
 		}
-		score := (depth + 1) * heuristic2(board)
+		score := (depth + 1) * heuristic2(board, (player+1)%2)
 		ret := step{pt, score}
 		if ch != nil {
 			ch <- ret
