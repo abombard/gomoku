@@ -103,7 +103,7 @@ func getBoard(w http.ResponseWriter, r *http.Request) {
 	nb := countEnnemyPawns(g.Board, current)
 	err = move(g.Board, t, current, &g.Board)
 	end := countEnnemyPawns(g.Board, current)
-	if end == nb+2 {
+	if end == nb-2 {
 		g.Players[current].Score += 2
 	}
 	if err != nil {
@@ -182,7 +182,12 @@ func play(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 		t = aiPlay()
 		g.Time = (time.Since(start) / 1000000)
+		nb := countEnnemyPawns(g.Board, current)
 		err = move(g.Board, t, current, &g.Board)
+		end := countEnnemyPawns(g.Board, current)
+		if end == nb-2 {
+			g.Players[current].Score += 2
+		}
 		current = (current + 1) % 2
 		if err != nil {
 			if err.Error() == "Game Over" {

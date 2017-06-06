@@ -199,13 +199,7 @@ func minmax(board [][]int, player int) coord {
 
 	b := boardCopy(board)
 
-	nb := countEnnemyPawns(b, player)
-
 	v := recminmax(b, coord{0, 0, ""}, player, MAXDEPTH, -10000, 10000, nil, false)
-	end := countEnnemyPawns(b, player)
-	if end == nb+2 {
-		g.Players[player].Score += 2
-	}
 
 	//log.Println("THE CHOOSEN ONE : ", v)
 

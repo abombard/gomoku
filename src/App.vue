@@ -19,10 +19,10 @@
   			:cellOnClick="this.play"
   		/>
         <div v-if="time!=0">
-        <p> <span class="w3-badge w3-yellow">{{this.score1}} ms</span></p>
-        <p> <span class="w3-badge w3-yellow">{{this.score2}} ms</span></p>
         <p> <span class="w3-badge w3-green">{{this.time}} ms</span></p>
         </div>
+        <p> <span class="w3-badge w3-yellow">{{this.score1}} </span></p>
+        <p> <span class="w3-badge w3-yellow">{{this.score2}} </span></p>
           <div v-if="win==true" class="w3-panel w3-green" align="center">
           YOU WON !
         </div>
