@@ -168,53 +168,57 @@ func canBeCaptured(b [][]int, x, y int, p int) bool {
 }
 
 func isGameOver(b [][]int, c coord, p int) bool {
-	x0, y0 := c.X, c.Y
 
-	count := 0
-	for x, y := x0-4, y0; x <= x0+4; x++ {
-		if isValidCoord(x, y) && isMe(b[x][y], p) && !canBeCaptured(b, x, y, p) {
-			count += 1
-			if count == 5 {
-				return true
-			}
-		} else {
-			count = 0
-		}
-	}
+	for x0 := 0; x0 < WIDTH; x0++ {
+		for y0 := 0; y0 < WIDTH; y0++ {
 
-	count = 0
-	for x, y := x0, y0-4; y <= y0+4; y++ {
-		if isValidCoord(x, y) && isMe(b[x][y], p) && !canBeCaptured(b, x, y, p) {
-			count += 1
-			if count == 5 {
-				return true
+			count := 0
+			for x, y := x0-4, y0; x <= x0+4; x++ {
+				if isValidCoord(x, y) && isMe(b[x][y], p) && !canBeCaptured(b, x, y, p) {
+					count += 1
+					if count == 5 {
+						return true
+					}
+				} else {
+					count = 0
+				}
 			}
-		} else {
-			count = 0
-		}
-	}
 
-	count = 0
-	for x, y := x0-4, y0-4; x <= x0+4 && y <= y0+4; x, y = x+1, y+1 {
-		if isValidCoord(x, y) && isMe(b[x][y], p) && !canBeCaptured(b, x, y, p) {
-			count += 1
-			if count == 5 {
-				return true
-			}
-		} else {
 			count = 0
-		}
-	}
+			for x, y := x0, y0-4; y <= y0+4; y++ {
+				if isValidCoord(x, y) && isMe(b[x][y], p) && !canBeCaptured(b, x, y, p) {
+					count += 1
+					if count == 5 {
+						return true
+					}
+				} else {
+					count = 0
+				}
+			}
 
-	count = 0
-	for x, y := x0-4, y0+4; x <= x0+4 && y >= y0-4; x, y = x+1, y-1 {
-		if isValidCoord(x, y) && isMe(b[x][y], p) && !canBeCaptured(b, x, y, p) {
-			count += 1
-			if count == 5 {
-				return true
-			}
-		} else {
 			count = 0
+			for x, y := x0-4, y0-4; x <= x0+4 && y <= y0+4; x, y = x+1, y+1 {
+				if isValidCoord(x, y) && isMe(b[x][y], p) && !canBeCaptured(b, x, y, p) {
+					count += 1
+					if count == 5 {
+						return true
+					}
+				} else {
+					count = 0
+				}
+			}
+
+			count = 0
+			for x, y := x0-4, y0+4; x <= x0+4 && y >= y0-4; x, y = x+1, y-1 {
+				if isValidCoord(x, y) && isMe(b[x][y], p) && !canBeCaptured(b, x, y, p) {
+					count += 1
+					if count == 5 {
+						return true
+					}
+				} else {
+					count = 0
+				}
+			}
 		}
 	}
 

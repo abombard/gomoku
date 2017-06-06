@@ -1,6 +1,5 @@
 package main
 
-import "log"
 
 const MAXDEPTH = 5
 
@@ -51,7 +50,8 @@ func recminmax(board [][]int, pt coord, player int, depth int, alpha, beta int, 
 	next := getPossibleMoveList(board)
 	// ERROR depth == MAXDEPTH && len(next) == 0 -> pt = shit
 	if depth == MAXDEPTH && len(next) == 0 {
-		log.Fatal("depth == MAXDEPTH && len(next) == 0: GAME OVER")
+	  return step{coord: coord{X:10, Y:10}}
+	//	log.Fatal("depth == MAXDEPTH && len(next) == 0: GAME OVER")
 	}
 	if depth == 0 || gameOver || len(next) == 0 {
 		if gameOver {

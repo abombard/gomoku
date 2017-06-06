@@ -18,6 +18,9 @@
   			:board="this.board"
   			:cellOnClick="this.play"
   		/>
+        <div v-if="time!=0">
+        <p> <span class="w3-badge w3-green">{{this.time}} ms</span></p>
+        </div>
           <div v-if="win==true" class="w3-panel w3-green" align="center">
           YOU WON !
         </div>
@@ -29,6 +32,12 @@
   	  	  	v-on:click="restart()"
   	  	>
   	  		Restart
+  	  	</button>
+  	  	<button
+  	  	  	class="w3-button w3-ripple w3-blue"
+  	  	  	v-on:click="hint()"
+  	  	>
+  	  		Hint
   	  	</button>
   	</div>
 </template>
@@ -43,7 +52,8 @@
   	  		id: (Math.random() % 255).toString(),
   	  		board: undefined,
             win: false,
-          lost: false
+          lost: false,
+          time: 0
       	}
   	  },
 
@@ -60,9 +70,27 @@
 				console.log(`/board ${err.body}`)
 			})
               },
+        hint: function () {
+			Vue.http.get('/hint').then(response => {
+				this.updateBoard(response)
+                if (response.status === 202 && !this.win) {
+                  this.lost = true
+                }
+			}, err => {
+				console.log(`/hint ${err.body}`)
+			})
+              },
 	  	  updateBoard: function (res) {
 	  	  	  res.json().then(newBoard => {
 	  	  	  	  this.board = newBoard;
+	  	  	  }, err => {
+				  console.log(`res.json() ${err.body}`);
+			  });
+	  	  },
+	  	  updateBoardAndTime: function (res) {
+	  	  	  res.json().then(newBoard => {
+	  	  	  	  this.board = newBoard.Board;
+	  	  	  	  this.time = newBoard.Time;
 	  	  	  }, err => {
 				  console.log(`res.json() ${err.body}`);
 			  });
@@ -86,7 +114,7 @@
                 }
 				this.updateBoard(response)
                 Vue.http.post('/play', { x:x, y:y, player:this.id }).then(response => {
-                  this.updateBoard(response)
+                  this.updateBoardAndTime(response)
                 }, err => {
                   console.log(`/play ${err.body}`)
 		  	  })
