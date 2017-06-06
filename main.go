@@ -115,6 +115,10 @@ func getBoard(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, err.Error(), 400)
 		}
 		return
+	} else if g.Players[current].Score >= 10 {
+		lost = true
+		w.WriteHeader(201)
+		return
 	} else {
 		current = (current + 1) % 2
 	}
@@ -197,6 +201,12 @@ func play(w http.ResponseWriter, r *http.Request) {
 			} else {
 				http.Error(w, err.Error(), 400)
 			}
+			iaPlaying = false
+			return
+		} else if g.Players[current].Score >= 10 {
+			lost = true
+			w.WriteHeader(201)
+			json.NewEncoder(w).Encode(g)
 			iaPlaying = false
 			return
 		}
