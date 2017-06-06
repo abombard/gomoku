@@ -21,7 +21,7 @@ const (
 type Gomoku struct {
 	Board [][]int
 	Mode  string
-	Time	 time.Duration
+	Time  time.Duration
 }
 
 var g Gomoku
@@ -54,7 +54,7 @@ var iaPlaying = false
 var lost = false
 
 func reset(w http.ResponseWriter, r *http.Request) {
-  lost = false
+	lost = false
 	resetBoard()
 	current = 0
 	w.Header().Set("Content-Type", "application/json")
@@ -64,21 +64,21 @@ func reset(w http.ResponseWriter, r *http.Request) {
 
 func board(w http.ResponseWriter, r *http.Request) {
 	if lost {
-				w.WriteHeader(202)
-	w.Header().Set("Content-Type", "application/json")
-	json.NewEncoder(w).Encode(g.Board)
-				return
+		w.WriteHeader(202)
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(g.Board)
+		return
 	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	json.NewEncoder(w).Encode(g.Board)
 }
 func getBoard(w http.ResponseWriter, r *http.Request) {
-  if iaPlaying {
+	if iaPlaying {
 		http.Error(w, "AI PLAYING", 400)
 		return
 
-  }
+	}
 	if g.Mode == "" {
 		http.Error(w, "No mode selected yet", 400)
 		return
@@ -90,19 +90,19 @@ func getBoard(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	defer r.Body.Close()
-		if t.Player != players[current] {
-			http.Error(w, "Not your turn bitch", 400)
-			return
-		}
+	if t.Player != players[current] {
+		http.Error(w, "Not your turn bitch", 400)
+		return
+	}
 	err = move(g.Board, t, current, &g.Board)
 	if err != nil {
 		log.Println(err)
-			  if err.Error() == "Game Over" {
-				lost = true
-				w.WriteHeader(201)
-			  } else {
-				http.Error(w, err.Error(), 400)
-			  }
+		if err.Error() == "Game Over" {
+			lost = true
+			w.WriteHeader(201)
+		} else {
+			http.Error(w, err.Error(), 400)
+		}
 		return
 	} else {
 		current = (current + 1) % 2
@@ -117,12 +117,17 @@ func startGame(w http.ResponseWriter, r *http.Request) {
 	var t start
 	err := decoder.Decode(&t)
 	if err != nil {
-		panic(err)
+		log.Println(err)
 	}
 	defer r.Body.Close()
-	g.Mode = t.Mode
+	if g.Mode != t.Mode {
+		lost = false
+		resetBoard()
+		current = 0
+		g.Mode = t.Mode
+	}
 	if g.Mode == "solo" {
-		if players[0] == "" {
+		if players[0] == "" || (players[0] != "" && t.Player != players[0]) {
 			players[0] = t.Player
 			players[1] = "AI"
 		}
@@ -131,6 +136,12 @@ func startGame(w http.ResponseWriter, r *http.Request) {
 			players[0] = t.Player
 		} else if players[1] == "" {
 			players[1] = t.Player
+		} else {
+			players[0] = t.Player
+			players[1] = ""
+			lost = false
+			resetBoard()
+			current = 0
 		}
 	}
 	w.Header().Set("Content-Type", "application/json")
@@ -151,29 +162,29 @@ func play(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	defer r.Body.Close()
-		if g.Mode == "solo" && lost == false {
-			iaPlaying = true
-			start := time.Now()
-			t = aiPlay()
-			g.Time = (time.Since(start) / 1000000)
-			err = move(g.Board, t, current, &g.Board)
-			current = (current + 1) % 2
-			if err != nil {
-			  if err.Error() == "Game Over" {
+	if g.Mode == "solo" && lost == false {
+		iaPlaying = true
+		start := time.Now()
+		t = aiPlay()
+		g.Time = (time.Since(start) / 1000000)
+		err = move(g.Board, t, current, &g.Board)
+		current = (current + 1) % 2
+		if err != nil {
+			if err.Error() == "Game Over" {
 				lost = true
 				w.WriteHeader(201)
 				json.NewEncoder(w).Encode(g)
-			  } else {
+			} else {
 				http.Error(w, err.Error(), 400)
-			  }
-				iaPlaying = false
-				return
 			}
+			iaPlaying = false
+			return
 		}
+	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	json.NewEncoder(w).Encode(g)
-		  iaPlaying = false
+	iaPlaying = false
 }
 
 func hint(w http.ResponseWriter, r *http.Request) {
@@ -182,16 +193,16 @@ func hint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var t coord
-		if lost == false {
-			iaPlaying = true
-			t = aiPlay()
-			g.Board[t.X][t.Y] = -1
-		}
+	if lost == false {
+		iaPlaying = true
+		t = aiPlay()
+		g.Board[t.X][t.Y] = -1
+	}
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	json.NewEncoder(w).Encode(g.Board)
-		  g.Board[t.X][t.Y] = 0
-		iaPlaying = false
+	g.Board[t.X][t.Y] = 0
+	iaPlaying = false
 }
 
 func main() {
