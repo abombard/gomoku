@@ -43,44 +43,62 @@ func isMe(c, p int) bool {
 
 func introduceDoubleThree(b [][]int, x, y int, p int) bool {
 
-	checks := [4][6][2]int{
-		{{-3, -3}, {-2, -2}, {-1, -1}, {1, 1}, {2, 2}, {3, 3}},
-		{{-3, 0}, {-2, 0}, {-1, 0}, {1, 0}, {2, 0}, {3, 0}},
-		{{-3, 3}, {-2, 2}, {-1, 1}, {1, -1}, {2, -2}, {3, -3}},
-		{{0, 3}, {0, 2}, {0, 1}, {0, -1}, {0, -2}, {0, -3}},
+	checks := [4][8][2]int{
+		{{-4, -4}, {-3, -3}, {-2, -2}, {-1, -1}, {1, 1}, {2, 2}, {3, 3}, {4, 4}},
+		{{-4, 0}, {-3, 0}, {-2, 0}, {-1, 0}, {1, 0}, {2, 0}, {3, 0}, {4, 0}},
+		{{-4, 4}, {-3, 3}, {-2, 2}, {-1, 1}, {1, -1}, {2, -2}, {3, -3}, {4, -4}},
+		{{0, 4}, {0, 3}, {0, 2}, {0, 1}, {0, -1}, {0, -2}, {0, -3}, {0, -4}},
 	}
 
 	threeCount := 0
 	for i := range checks {
+		prevOk := false
+		nextOk := false
+		prev := -1
 		count := 0
 		blank := 0
-		for j := range checks[i] {
-			if j == 3 {
-				count += 1
-				if count == 3 {
-					break
+		for j := 0; j < len(checks[i]); j++ {
+			if j == 4 {
+				if count == 0 {
+					blank = 0
 				}
+				count += 1
 			}
 			x1, y1 := x+checks[i][j][0], y+checks[i][j][1]
+			if count == 3 {
+				nextOk = isValidCoord(x1, y1) && isEmpty(b[x1][y1])
+				break
+			}
 			if isValidCoord(x1, y1) {
 				if isMe(b[x1][y1], p) {
-					blank = 0
-					count += 1
-					if count == 3 {
-						break
+					if count == 0 {
+						blank = 0
 					}
+					count += 1
 				} else if isEnemy(b[x1][y1], p) {
+					if count == 0 {
+						prevOk = false
+					}
 					blank = 0
 					count = 0
 				} else {
 					blank += 1
-					if blank > 1 {
-						count = 0
+					if blank > 1 && count > 0 {
+						if isEmpty(prev) {
+							count = 0
+						} else {
+							count -= 1
+							blank -= 1
+						}
+					}
+					if count == 0 {
+						prevOk = true
 					}
 				}
+				prev = b[x1][y1]
 			}
 		}
-		if count == 3 {
+		if count == 3 && prevOk && nextOk {
 			threeCount += 1
 		}
 	}
