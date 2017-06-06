@@ -100,11 +100,17 @@ func getBoard(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Not your turn bitch", 400)
 		return
 	}
-	nb := countEnnemyPawns(g.Board, current)
+	nb := countEnemyPawns(g.Board, current)
 	err = move(g.Board, t, current, &g.Board)
-	end := countEnnemyPawns(g.Board, current)
+	end := countEnemyPawns(g.Board, current)
 	if end == nb-2 {
 		g.Players[current].Score += 2
+	}
+	if g.Players[current].Score >= 10 {
+		lost = true
+		w.WriteHeader(201)
+		json.NewEncoder(w).Encode(g)
+		return
 	}
 	if err != nil {
 		log.Println(err)
@@ -114,10 +120,6 @@ func getBoard(w http.ResponseWriter, r *http.Request) {
 		} else {
 			http.Error(w, err.Error(), 400)
 		}
-		return
-	} else if g.Players[current].Score >= 10 {
-		lost = true
-		w.WriteHeader(201)
 		return
 	} else {
 		current = (current + 1) % 2
@@ -186,11 +188,18 @@ func play(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
 		t = aiPlay()
 		g.Time = (time.Since(start) / 1000000)
-		nb := countEnnemyPawns(g.Board, current)
+		nb := countEnemyPawns(g.Board, current)
 		err = move(g.Board, t, current, &g.Board)
-		end := countEnnemyPawns(g.Board, current)
+		end := countEnemyPawns(g.Board, current)
 		if end == nb-2 {
 			g.Players[current].Score += 2
+		}
+		if g.Players[current].Score >= 10 {
+			lost = true
+			w.WriteHeader(201)
+			json.NewEncoder(w).Encode(g)
+			iaPlaying = false
+			return
 		}
 		current = (current + 1) % 2
 		if err != nil {
@@ -201,12 +210,6 @@ func play(w http.ResponseWriter, r *http.Request) {
 			} else {
 				http.Error(w, err.Error(), 400)
 			}
-			iaPlaying = false
-			return
-		} else if g.Players[current].Score >= 10 {
-			lost = true
-			w.WriteHeader(201)
-			json.NewEncoder(w).Encode(g)
 			iaPlaying = false
 			return
 		}
