@@ -236,9 +236,9 @@ func hint(w http.ResponseWriter, r *http.Request) {
 		t = aiPlay()
 		g.Board[t.X][t.Y] = -1
 	}
-	g.Board[t.X][t.Y] = 0
 	iaPlaying = false
 	sendState(w, r)
+	g.Board[t.X][t.Y] = 0
 }
 
 func previous(w http.ResponseWriter, r *http.Request) {
