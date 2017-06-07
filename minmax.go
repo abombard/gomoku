@@ -1,5 +1,7 @@
 package main
 
+//import "log"
+
 const MAXDEPTH = 5
 
 func getPossibleMoveList(b [][]int) []coord {
@@ -67,6 +69,8 @@ func min(n1, n2 int) int {
 	return n2
 }
 
+var killer [MAXDEPTH + 1][]coord
+
 func recminmax(board [][]int, player, depth, alpha, beta int, gameOver bool) step {
 
 	if depth == 0 || gameOver {
@@ -94,7 +98,11 @@ func recminmax(board [][]int, player, depth, alpha, beta int, gameOver bool) ste
 		v = step{score: 10000000}
 	}
 
-	nextMoves := getPossibleMoveList(board)
+	var nextMoves []coord
+	if depth > 1 {
+		nextMoves = append(nextMoves, killer[depth]...)
+	}
+	nextMoves = append(nextMoves, getPossibleMoveList(board)...)
 	for i := range nextMoves {
 
 		var newBoard [][]int
@@ -119,6 +127,22 @@ func recminmax(board [][]int, player, depth, alpha, beta int, gameOver bool) ste
 		}
 
 		if alpha >= beta {
+			if depth > 1 {
+				same := false
+				for _, val := range killer[depth] {
+					if val.X == nextMoves[i].X && val.Y == nextMoves[i].Y {
+						same = true
+					}
+				}
+				if same == true {
+					break
+				}
+				if len(killer[depth]) < 2 {
+					killer[depth] = append(killer[depth], nextMoves[i])
+				} else {
+					killer[depth][0] = nextMoves[i]
+				}
+			}
 			break
 		}
 	}

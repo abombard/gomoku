@@ -503,7 +503,6 @@ func getScore(board [][]int, player int) int {
 var trans = make(map[string]int)
 
 func heuristic2(board [][]int, player int) int {
-	fmt.Println(len(trans))
 	if val, ok := trans[fmt.Sprintln(board)]; ok {
 		return val
 	}
