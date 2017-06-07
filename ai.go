@@ -1,7 +1,7 @@
 package main
 
 func aiPlay() coord {
-	coord := minmax(g.Board, current)
+	coord := minmax(g.Board, g.Current)
 	return coord
 }
 

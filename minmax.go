@@ -6,6 +6,7 @@ func getPossibleMoveList(b [][]int) []coord {
 
 	var coords []coord
 
+	// Get all pawns after or between 2 pawns of same color
 	for x := 0; x < HEIGHT; x++ {
 		for y := 0; y < WIDTH; y++ {
 			if isEmpty(b[x][y]) && (isPawnNearby2(b, x, y) || isBetweenPawn(b, x, y)) {
@@ -14,6 +15,7 @@ func getPossibleMoveList(b [][]int) []coord {
 		}
 	}
 
+	// Get all pawns near another pawn
 	if len(coords) == 0 {
 		for x := 0; x < HEIGHT; x++ {
 			for y := 0; y < WIDTH; y++ {
@@ -24,6 +26,11 @@ func getPossibleMoveList(b [][]int) []coord {
 		}
 	}
 
+	// First move
+	if len(coords) == 0 {
+		coords = append(coords, coord{X: 10, Y: 10})
+	}
+
 	return coords
 }
 
@@ -32,35 +39,44 @@ type step struct {
 	score int
 }
 
-func recminmax(board [][]int, pt coord, player int, depth int, alpha, beta int, ch chan step, gameOver bool) step {
-
-	next := getPossibleMoveList(board)
-	// ERROR depth == MAXDEPTH && len(next) == 0 -> pt = shit
-	if depth == MAXDEPTH && len(next) == 0 {
-		return step{coord: coord{X: 10, Y: 10}}
-		//	log.Fatal("depth == MAXDEPTH && len(next) == 0: GAME OVER")
+func maxstep(s1, s2 step) step {
+	if s1.score >= s2.score {
+		return s1
 	}
-	if depth == 0 || gameOver || len(next) == 0 {
-		if gameOver {
-			depth += 1
-		}
-		score := (depth + 1) * heuristic2(board, (player+1)%2)
-		ret := step{pt, score}
-		if ch != nil {
-			ch <- ret
-		}
-		return ret
-	}
+	return s2
+}
 
-	var v step
-	if player == current {
-		v = step{score: -10000000}
-	} else {
-		v = step{score: 10000000}
+func minstep(s1, s2 step) step {
+	if s1.score <= s2.score {
+		return s1
+	}
+	return s2
+}
+
+func max(n1, n2 int) int {
+	if n1 >= n2 {
+		return n1
+	}
+	return n2
+}
+
+func min(n1, n2 int) int {
+	if n1 <= n2 {
+		return n1
+	}
+	return n2
+}
+
+func recminmax(board [][]int, player, depth, alpha, beta int, gameOver bool) step {
+
+	if depth == 0 || gameOver {
+		score := (depth + 1) * heuristic2(board, g.Current)
+		return step{score: score}
 	}
 
 	addMove := func(b [][]int, nb *[][]int, c coord, gameOver *bool) error {
-		err := move(b, c, player, nb)
+		pCapturedCount := 0
+		err := move(b, c, player, nb, &pCapturedCount)
 		if err != nil {
 			if err.Error() == "Game Over" {
 				*gameOver = true
@@ -71,89 +87,40 @@ func recminmax(board [][]int, pt coord, player int, depth int, alpha, beta int, 
 		return nil
 	}
 
-	updateVScore := func(score int, c coord, done *bool) {
-		*done = false
-		if player == current {
-			if score > v.score {
-				v.coord = c
-				v.score = score
-			}
-			if score > alpha {
-				alpha = score
-				if alpha >= beta {
-					*done = true
-				}
-			}
-		} else {
-			if score < v.score {
-				v.coord = c
-				v.score = score
-			}
-			if score < beta {
-				beta = score
-				if alpha >= beta {
-					*done = true
-				}
-			}
-		}
-	}
-
-	if depth == MAXDEPTH {
-		newch := make(chan step, len(next))
-
-		k := 0
-		for i := range next {
-
-			gameOver := false
-
-			b := boardCopy(board)
-
-			err := addMove(b, &b, next[i], &gameOver)
-			if err != nil {
-				k++
-				continue
-			}
-
-			go recminmax(b, next[i], (player+1)%2, depth-1, alpha, beta, newch, gameOver)
-		}
-
-		for i := 0; i < len(next)-k; i++ {
-			tmp := <-newch
-
-			var done bool
-			updateVScore(tmp.score, tmp.coord, &done)
-			if done {
-				break
-			}
-
-		}
-
+	var v step
+	if player == g.Current {
+		v = step{score: -10000000}
 	} else {
-
-		for i := range next {
-
-			gameOver := false
-
-			var newBoard [][]int
-			err := addMove(board, &newBoard, next[i], &gameOver)
-			if err != nil {
-				continue
-			}
-
-			tmp := recminmax(newBoard, next[i], (player+1)%2, depth-1, alpha, beta, nil, gameOver)
-
-			var done bool
-			updateVScore(tmp.score, pt, &done)
-			board[next[i].X][next[i].Y] = 0
-
-			if done {
-				break
-			}
-		}
+		v = step{score: 10000000}
 	}
 
-	if ch != nil {
-		ch <- v
+	nextMoves := getPossibleMoveList(board)
+	for i := range nextMoves {
+
+		var newBoard [][]int
+		gameOver := false
+
+		err := addMove(board, &newBoard, nextMoves[i], &gameOver)
+		if err != nil {
+			continue
+		}
+
+		s := recminmax(newBoard, (player+1)%2, depth-1, alpha, beta, gameOver)
+		s.coord = nextMoves[i]
+
+		board[nextMoves[i].X][nextMoves[i].Y] = 0
+
+		if player == g.Current {
+			v = maxstep(v, s)
+			alpha = max(alpha, s.score)
+		} else {
+			v = minstep(v, s)
+			beta = min(beta, s.score)
+		}
+
+		if alpha >= beta {
+			break
+		}
 	}
 
 	return v
@@ -180,14 +147,13 @@ func countEnemyPawns(b [][]int, player int) int {
 		}
 	}
 	return count
-
 }
 
 func minmax(board [][]int, player int) coord {
 
 	b := boardCopy(board)
 
-	v := recminmax(b, coord{0, 0, ""}, player, MAXDEPTH, -10000, 10000, nil, false)
+	v := recminmax(b, player, MAXDEPTH, -10000, 10000, false)
 
 	//log.Println("THE CHOOSEN ONE : ", v)
 

@@ -19,23 +19,11 @@ func maxval(a, b, c, d int) int {
 	return best
 }
 
-func isEmptyNew(x, y int, board [][]int, p int) bool {
-	return board[x][y] == 0
-}
-
-func isMeNew(x, y int, board [][]int, player int) bool {
-	return board[x][y] == player+1
-}
-
-func isEnemyNew(x, y int, board [][]int, player int) bool {
-	return !isEmptyNew(x, y, board, player) && board[x][y] != player+1
-}
-
 func getScore1(board [][]int, player int) int {
 	score := 0
 	for x := 0; x < WIDTH; x++ {
 		for y := 0; y < HEIGHT; y++ {
-			if isMeNew(x, y, board, player) {
+			if isMe(board[x][y], player) {
 				tmpx := x + 1
 				tmpy := y
 				horScore := 0
@@ -48,9 +36,9 @@ func getScore1(board [][]int, player int) int {
 				diagSpace2 := 0
 				b := 1
 				stop := false
-				for ; isValidCoord(tmpx, tmpy) && (isMeNew(tmpx, tmpy, board, player) || isEmptyNew(tmpx, tmpy, board, player)); tmpx++ {
-					if !stop && isMeNew(tmpx, tmpy, board, player) {
-						if canBeCaptured(board, tmpx, tmpy, player) {
+				for ; isValidCoord(tmpx, tmpy) && (isMe(board[tmpx][tmpy], player) || isEmpty(board[tmpx][tmpy])); tmpx++ {
+					if !stop && isMe(board[tmpx][tmpy], player) {
+						if canBeCaptured(board, tmpx, tmpy) {
 							b = 1
 						}
 						horScore += b
@@ -66,9 +54,9 @@ func getScore1(board [][]int, player int) int {
 				}
 				stop = false
 				tmpx = x - 1
-				for ; isValidCoord(tmpx, tmpy) && (isMeNew(tmpx, tmpy, board, player) || isEmptyNew(tmpx, tmpy, board, player)); tmpx-- {
-					if !stop && isMeNew(tmpx, tmpy, board, player) {
-						if canBeCaptured(board, tmpx, tmpy, player) {
+				for ; isValidCoord(tmpx, tmpy) && (isMe(board[tmpx][tmpy], player) || isEmpty(board[tmpx][tmpy])); tmpx-- {
+					if !stop && isMe(board[tmpx][tmpy], player) {
+						if canBeCaptured(board, tmpx, tmpy) {
 							b = 1
 						}
 						horScore += b
@@ -86,9 +74,9 @@ func getScore1(board [][]int, player int) int {
 				tmpx = x
 				tmpy = y + 1
 				b = 1
-				for ; isValidCoord(tmpx, tmpy) && (isMeNew(tmpx, tmpy, board, player) || isEmptyNew(tmpx, tmpy, board, player)); tmpy++ {
-					if !stop && isMeNew(tmpx, tmpy, board, player) {
-						if canBeCaptured(board, tmpx, tmpy, player) {
+				for ; isValidCoord(tmpx, tmpy) && (isMe(board[tmpx][tmpy], player) || isEmpty(board[tmpx][tmpy])); tmpy++ {
+					if !stop && isMe(board[tmpx][tmpy], player) {
+						if canBeCaptured(board, tmpx, tmpy) {
 							b = 1
 						}
 						verScore += b
@@ -103,9 +91,9 @@ func getScore1(board [][]int, player int) int {
 				}
 				stop = false
 				tmpy = y - 1
-				for ; isValidCoord(tmpx, tmpy) && (isMeNew(tmpx, tmpy, board, player) || isEmptyNew(tmpx, tmpy, board, player)); tmpy-- {
-					if !stop && isMeNew(tmpx, tmpy, board, player) {
-						if canBeCaptured(board, tmpx, tmpy, player) {
+				for ; isValidCoord(tmpx, tmpy) && (isMe(board[tmpx][tmpy], player) || isEmpty(board[tmpx][tmpy])); tmpy-- {
+					if !stop && isMe(board[tmpx][tmpy], player) {
+						if canBeCaptured(board, tmpx, tmpy) {
 							b = 1
 						}
 						verScore += b
@@ -123,9 +111,9 @@ func getScore1(board [][]int, player int) int {
 				b = 1
 				tmpy = y - 1
 				tmpx = x - 1
-				for ; isValidCoord(tmpx, tmpy) && (isMeNew(tmpx, tmpy, board, player) || isEmptyNew(tmpx, tmpy, board, player)); tmpx, tmpy = tmpx-1, tmpy-1 {
-					if !stop && isMeNew(tmpx, tmpy, board, player) {
-						if canBeCaptured(board, tmpx, tmpy, player) {
+				for ; isValidCoord(tmpx, tmpy) && (isMe(board[tmpx][tmpy], player) || isEmpty(board[tmpx][tmpy])); tmpx, tmpy = tmpx-1, tmpy-1 {
+					if !stop && isMe(board[tmpx][tmpy], player) {
+						if canBeCaptured(board, tmpx, tmpy) {
 							b = 1
 						}
 						diagScore1 += b
@@ -142,9 +130,9 @@ func getScore1(board [][]int, player int) int {
 				stop = false
 				tmpx = x + 1
 				tmpy = y + 1
-				for ; isValidCoord(tmpx, tmpy) && (isMeNew(tmpx, tmpy, board, player) || isEmptyNew(tmpx, tmpy, board, player)); tmpx, tmpy = tmpx+1, tmpy+1 {
-					if !stop && isMeNew(tmpx, tmpy, board, player) {
-						if canBeCaptured(board, tmpx, tmpy, player) {
+				for ; isValidCoord(tmpx, tmpy) && (isMe(board[tmpx][tmpy], player) || isEmpty(board[tmpx][tmpy])); tmpx, tmpy = tmpx+1, tmpy+1 {
+					if !stop && isMe(board[tmpx][tmpy], player) {
+						if canBeCaptured(board, tmpx, tmpy) {
 							b = 1
 						}
 						diagScore1 += b
@@ -162,9 +150,9 @@ func getScore1(board [][]int, player int) int {
 				b = 1
 				tmpx = x + 1
 				tmpy = y - 1
-				for ; isValidCoord(tmpx, tmpy) && (isMeNew(tmpx, tmpy, board, player) || isEmptyNew(tmpx, tmpy, board, player)); tmpx, tmpy = tmpx+1, tmpy-1 {
-					if !stop && isMeNew(tmpx, tmpy, board, player) {
-						if canBeCaptured(board, tmpx, tmpy, player) {
+				for ; isValidCoord(tmpx, tmpy) && (isMe(board[tmpx][tmpy], player) || isEmpty(board[tmpx][tmpy])); tmpx, tmpy = tmpx+1, tmpy-1 {
+					if !stop && isMe(board[tmpx][tmpy], player) {
+						if canBeCaptured(board, tmpx, tmpy) {
 							b = 1
 						}
 						diagScore2 += b
@@ -181,9 +169,9 @@ func getScore1(board [][]int, player int) int {
 				stop = false
 				tmpx = x - 1
 				tmpy = y + 1
-				for ; isValidCoord(tmpx, tmpy) && (isMeNew(tmpx, tmpy, board, player) || isEmptyNew(tmpx, tmpy, board, player)); tmpx, tmpy = tmpx-1, tmpy+1 {
-					if !stop && isMeNew(tmpx, tmpy, board, player) {
-						if canBeCaptured(board, tmpx, tmpy, player) {
+				for ; isValidCoord(tmpx, tmpy) && (isMe(board[tmpx][tmpy], player) || isEmpty(board[tmpx][tmpy])); tmpx, tmpy = tmpx-1, tmpy+1 {
+					if !stop && isMe(board[tmpx][tmpy], player) {
+						if canBeCaptured(board, tmpx, tmpy) {
 							b = 1
 						}
 						diagScore2 += b
@@ -213,7 +201,7 @@ func getScore1(board [][]int, player int) int {
 				}
 
 				score += horScore + verScore + diagScore1 + diagScore2
-			} else if isEnemyNew(x, y, board, player) {
+			} else if isEnemy(board[x][y], player) {
 				tmpx := x + 1
 				tmpy := y
 				horScore := 0
@@ -226,9 +214,9 @@ func getScore1(board [][]int, player int) int {
 				diagSpace2 := 0
 				b := 1
 				stop := false
-				for ; isValidCoord(tmpx, tmpy) && (isEnemyNew(tmpx, tmpy, board, player) || isEmptyNew(tmpx, tmpy, board, player)); tmpx++ {
-					if !stop && isEnemyNew(tmpx, tmpy, board, player) {
-						if canBeCaptured(board, tmpx, tmpy, player) {
+				for ; isValidCoord(tmpx, tmpy) && (isEnemy(board[tmpx][tmpy], player) || isEmpty(board[tmpx][tmpy])); tmpx++ {
+					if !stop && isEnemy(board[tmpx][tmpy], player) {
+						if canBeCaptured(board, tmpx, tmpy) {
 							b = 1
 						}
 						horScore += b
@@ -244,9 +232,9 @@ func getScore1(board [][]int, player int) int {
 				}
 				stop = false
 				tmpx = x - 1
-				for ; isValidCoord(tmpx, tmpy) && (isEnemyNew(tmpx, tmpy, board, player) || isEmptyNew(tmpx, tmpy, board, player)); tmpx-- {
-					if !stop && isEnemyNew(tmpx, tmpy, board, player) {
-						if canBeCaptured(board, tmpx, tmpy, player) {
+				for ; isValidCoord(tmpx, tmpy) && (isEnemy(board[tmpx][tmpy], player) || isEmpty(board[tmpx][tmpy])); tmpx-- {
+					if !stop && isEnemy(board[tmpx][tmpy], player) {
+						if canBeCaptured(board, tmpx, tmpy) {
 							b = 1
 						}
 						horScore += b
@@ -264,9 +252,9 @@ func getScore1(board [][]int, player int) int {
 				tmpx = x
 				tmpy = y + 1
 				b = 1
-				for ; isValidCoord(tmpx, tmpy) && (isEnemyNew(tmpx, tmpy, board, player) || isEmptyNew(tmpx, tmpy, board, player)); tmpy++ {
-					if !stop && isEnemyNew(tmpx, tmpy, board, player) {
-						if canBeCaptured(board, tmpx, tmpy, player) {
+				for ; isValidCoord(tmpx, tmpy) && (isEnemy(board[tmpx][tmpy], player) || isEmpty(board[tmpx][tmpy])); tmpy++ {
+					if !stop && isEnemy(board[tmpx][tmpy], player) {
+						if canBeCaptured(board, tmpx, tmpy) {
 							b = 1
 						}
 						verScore += b
@@ -281,9 +269,9 @@ func getScore1(board [][]int, player int) int {
 				}
 				stop = false
 				tmpy = y - 1
-				for ; isValidCoord(tmpx, tmpy) && (isEnemyNew(tmpx, tmpy, board, player) || isEmptyNew(tmpx, tmpy, board, player)); tmpy-- {
-					if !stop && isEnemyNew(tmpx, tmpy, board, player) {
-						if canBeCaptured(board, tmpx, tmpy, player) {
+				for ; isValidCoord(tmpx, tmpy) && (isEnemy(board[tmpx][tmpy], player) || isEmpty(board[tmpx][tmpy])); tmpy-- {
+					if !stop && isEnemy(board[tmpx][tmpy], player) {
+						if canBeCaptured(board, tmpx, tmpy) {
 							b = 1
 						}
 						verScore += b
@@ -301,9 +289,9 @@ func getScore1(board [][]int, player int) int {
 				b = 1
 				tmpy = y - 1
 				tmpx = x - 1
-				for ; isValidCoord(tmpx, tmpy) && (isEnemyNew(tmpx, tmpy, board, player) || isEmptyNew(tmpx, tmpy, board, player)); tmpx, tmpy = tmpx-1, tmpy-1 {
-					if !stop && isEnemyNew(tmpx, tmpy, board, player) {
-						if canBeCaptured(board, tmpx, tmpy, player) {
+				for ; isValidCoord(tmpx, tmpy) && (isEnemy(board[tmpx][tmpy], player) || isEmpty(board[tmpx][tmpy])); tmpx, tmpy = tmpx-1, tmpy-1 {
+					if !stop && isEnemy(board[tmpx][tmpy], player) {
+						if canBeCaptured(board, tmpx, tmpy) {
 							b = 1
 						}
 						diagScore1 += b
@@ -320,9 +308,9 @@ func getScore1(board [][]int, player int) int {
 				stop = false
 				tmpx = x + 1
 				tmpy = y + 1
-				for ; isValidCoord(tmpx, tmpy) && (isEnemyNew(tmpx, tmpy, board, player) || isEmptyNew(tmpx, tmpy, board, player)); tmpx, tmpy = tmpx+1, tmpy+1 {
-					if !stop && isEnemyNew(tmpx, tmpy, board, player) {
-						if canBeCaptured(board, tmpx, tmpy, player) {
+				for ; isValidCoord(tmpx, tmpy) && (isEnemy(board[tmpx][tmpy], player) || isEmpty(board[tmpx][tmpy])); tmpx, tmpy = tmpx+1, tmpy+1 {
+					if !stop && isEnemy(board[tmpx][tmpy], player) {
+						if canBeCaptured(board, tmpx, tmpy) {
 							b = 1
 						}
 						diagScore1 += b
@@ -340,9 +328,9 @@ func getScore1(board [][]int, player int) int {
 				b = 1
 				tmpx = x + 1
 				tmpy = y - 1
-				for ; isValidCoord(tmpx, tmpy) && (isEnemyNew(tmpx, tmpy, board, player) || isEmptyNew(tmpx, tmpy, board, player)); tmpx, tmpy = tmpx+1, tmpy-1 {
-					if !stop && isEnemyNew(tmpx, tmpy, board, player) {
-						if canBeCaptured(board, tmpx, tmpy, player) {
+				for ; isValidCoord(tmpx, tmpy) && (isEnemy(board[tmpx][tmpy], player) || isEmpty(board[tmpx][tmpy])); tmpx, tmpy = tmpx+1, tmpy-1 {
+					if !stop && isEnemy(board[tmpx][tmpy], player) {
+						if canBeCaptured(board, tmpx, tmpy) {
 							b = 1
 						}
 						diagScore2 += b
@@ -359,9 +347,9 @@ func getScore1(board [][]int, player int) int {
 				stop = false
 				tmpx = x - 1
 				tmpy = y + 1
-				for ; isValidCoord(tmpx, tmpy) && (isEnemyNew(tmpx, tmpy, board, player) || isEmptyNew(tmpx, tmpy, board, player)); tmpx, tmpy = tmpx-1, tmpy+1 {
-					if !stop && isEnemyNew(tmpx, tmpy, board, player) {
-						if canBeCaptured(board, tmpx, tmpy, player) {
+				for ; isValidCoord(tmpx, tmpy) && (isEnemy(board[tmpx][tmpy], player) || isEmpty(board[tmpx][tmpy])); tmpx, tmpy = tmpx-1, tmpy+1 {
+					if !stop && isEnemy(board[tmpx][tmpy], player) {
+						if canBeCaptured(board, tmpx, tmpy) {
 							b = 1
 						}
 						diagScore2 += b
@@ -429,7 +417,8 @@ func getScore(board [][]int, player int) int {
 	}
 
 	updateScore := func(x, y int) {
-		if curSpacePrev+curScore+curSpaceNext > 5 {
+		score += calcScore(curScore)
+		if curSpacePrev+curScore+curSpaceNext >= 5 {
 			if curSpacePrev > 0 {
 				curSpacePrev -= 1
 			} else if curScore > 0 {
@@ -438,7 +427,6 @@ func getScore(board [][]int, player int) int {
 				curSpaceNext -= 1
 			}
 		}
-		score += calcScore(curScore)
 		if isEmpty(board[x][y]) {
 			curSpaceNext += 1
 		} else {
@@ -451,7 +439,7 @@ func getScore(board [][]int, player int) int {
 				curSpacePrev = curSpaceNext
 				curSpaceNext = 0
 			}
-			if canBeCaptured(board, x, y, board[x][y]) {
+			if canBeCaptured(board, x, y) {
 				curScore = 0
 				curSpacePrev = 0
 				curSpaceNext = 0

@@ -19,19 +19,21 @@
   			:cellOnClick="this.play"
   		/>
         <div align="left">
-        <span class="w3-badge  w3-large w3-pink">{{this.score1}} </span>
+        	<span class="w3-badge  w3-large w3-pink">{{this.score1}} </span>
         </div>
         <div align="right">
-        <span class="w3-badge w3-large w3-pink">{{this.score2}} </span>
+        I	<span class="w3-badge w3-large w3-pink">{{this.score2}} </span>
         </div>
         <div v-if="time!=0">
-        <p> <span class="w3-badge w3-green">{{this.time}} ms</span></p>
+        	<p> <span class="w3-badge w3-green">{{this.time}} ms</span></p>
         </div>
-          <div v-if="win==true" class="w3-panel w3-green" align="center">
-          YOU WON !
-        </div>
-          <div v-if="lost==true" class="w3-panel w3-red" align="center">
-          YOU LOST !
+        <div v-if="gameOver==true" class="w3-panel" align="center">
+          	<div v-if="players[winner].Name==id" class="w3-green">
+          		YOU WON !
+          	</div>
+          	<div v-else class="w3-red">
+          		YOU LOST !
+          	</div>
         </div>
   	  	<button
   	  	  	class="w3-button w3-ripple w3-purple"
@@ -57,90 +59,94 @@
   	  	return {
   	  		id: (Math.random() % 255).toString(),
   	  		board: undefined,
-            win: false,
-          lost: false,
-          time: 0,
-          score1: 0,
-          score2: 0
+            players: [{Name:"", Score:0}, {Name:"", Score:0}],
+            current: 0,
+            gameOver: false,
+            winner: 0,
+          	time: 0,
+          	score1: 0,
+          	score2: 0
       	}
   	  },
 
 	  components: { Board },
 
 	  methods: {
+
         loadData: function () {
 			Vue.http.get('/board').then(response => {
-				this.updateBoard(response)
-                if (response.status === 202 && !this.win) {
-                  this.lost = true
-                }
+				this.updateState(response)
 			}, err => {
 				console.log(`/board ${err.body}`)
 			})
-              },
+        },
+
         hint: function () {
 			Vue.http.get('/hint').then(response => {
-				this.updateBoard(response)
-                if (response.status === 202 && !this.win) {
-                  this.lost = true
-                }
+				this.updateState(response)
 			}, err => {
 				console.log(`/hint ${err.body}`)
 			})
-              },
-	  	  updateBoard: function (res) {
-	  	  	  res.json().then(newBoard => {
-	  	  	  	  this.board = newBoard.Board;
-	  	  	  	  this.time = newBoard.Time;
-                this.score1 = newBoard.Players[0].Score;
-                this.score2 = newBoard.Players[1].Score;
-                  
-	  	  	  }, err => {
-				  console.log(`res.json() ${err.body}`);
-			  });
-	  	  },
-	  	  startGame: function (mode) {
+      	},
+
+	  	updateState: function (res) {
+	  	  	res.json().then(state => {
+	  	 		this.board = state.Board;
+	  	 		this.players = state.Players;
+	  	 		this.current = state.Current;
+	  	 		this.gameOver = state.GameOver;
+	  	 		this.winner = state.Winner;
+	 	  	  	this.time = state.Time;
+	  	  	}, err => {
+				console.log(`res.json() ${err.body}`);
+			});
+	  	},
+
+	  	startGame: function (mode) {
 			console.log(`startGame ${mode}`);
 			Vue.http.post('/startgame', { mode:mode, player:this.id }).then(response => {
-				this.updateBoard(response)
-              this.loop()
+				this.updateState(response)
+              	this.loop()
 			}, err => {
 				console.log(`/startgame ${err.body}`)
 			})
-		  },
-		  play: function (x, y) {
-            if (this.win || this.lost) {
+		},
+
+		play: function (x, y) {
+            if (this.gameOver) {
                 return
             }
-		  	  Vue.http.post('/getboard', { x:x, y:y, player:this.id }).then(response => {
-                if (response.status === 201) {
-                  this.win = true
+		  	Vue.http.post('/getboard', { x:x, y:y, player:this.id }).then(response => {
+				this.updateState(response)
+                if (this.gameOver) {
+                	return
                 }
-				this.updateBoard(response)
                 Vue.http.post('/play', { x:x, y:y, player:this.id }).then(response => {
-                  this.updateBoard(response)
+                	this.updateState(response)
                 }, err => {
-                  console.log(`/play ${err.body}`)
-		  	  })
-		  	  }, err => {
-		  	  })
-		  },
-	  	  restart: function () {
-            this.win = false
-            this.lost = false
+                	console.log(`/play ${err.body}`)
+		  	  	})
+		  	}, err => {
+			})
+		},
+
+	  	restart: function () {
+        	this.win = false
+        	this.lost = false
 			Vue.http.get('/reset').then(response => {
-				this.updateBoard(response)
+				this.updateState(response)
 			}, err => {
 				console.log(`/reset ${err.body}`)
 			})
-		  },
-      loop: function () {
+		},
+      
+      	loop: function () {
             this.loadData();
 
             setInterval(function () {
-                    this.loadData();
-                  }.bind(this), 3000); 
-          }
+            	this.loadData();
+            }.bind(this), 3000); 
+        }
 	  }
 	}
 

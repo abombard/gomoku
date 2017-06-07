@@ -19,14 +19,17 @@ const (
 )
 
 type Gomoku struct {
-	Board   [][]int
-	Mode    string
-	Time    time.Duration
-	Players [2]player
+	Board    [][]int
+	Current  int
+	Mode     string
+	Time     time.Duration
+	Players  [2]player
+	GameOver bool
+	Winner   int
 }
 
 var g Gomoku
-var current int = 0
+var iaPlaying = false
 
 type player struct {
 	Name  string
@@ -38,47 +41,87 @@ type coord struct {
 	Player string
 }
 
+func sendState(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(200)
+	json.NewEncoder(w).Encode(g)
+}
+
+func resetBoard() {
+	g.Board = make([][]int, HEIGHT)
+	for x := 0; x < HEIGHT; x++ {
+		(g.Board)[x] = make([]int, WIDTH)
+		for y := 0; y < WIDTH; y++ {
+			(g.Board)[x][y] = 0
+		}
+	}
+}
+
+func resetGame(gc *Gomoku) {
+	resetBoard()
+	gc.Current = 0
+	gc.Mode = ""
+	gc.Time = 0
+	gc.Players[0].Name = ""
+	gc.Players[0].Score = 0
+	gc.Players[1].Name = ""
+	gc.Players[1].Score = 0
+	gc.GameOver = false
+	gc.Winner = 0
+}
+
+func reset(w http.ResponseWriter, r *http.Request) {
+	resetBoard()
+	g.Current = 0
+	g.Time = 0
+	g.Players[0].Score = 0
+	g.Players[1].Score = 0
+	g.GameOver = false
+	g.Winner = 0
+	sendState(w, r)
+}
+
+func setWinner(gc *Gomoku) {
+	gc.GameOver = true
+	gc.Winner = gc.Current
+}
+
 // Init
 type start struct {
 	Mode   string
 	Player string
 }
 
-func resetBoard() {
-	g.Board = make([][]int, HEIGHT)
-	for x := 0; x < HEIGHT; x++ {
-		g.Board[x] = make([]int, WIDTH)
-		for y := 0; y < WIDTH; y++ {
-			g.Board[x][y] = 0
+func startGame(w http.ResponseWriter, r *http.Request) {
+	decoder := json.NewDecoder(r.Body)
+	var t start
+	err := decoder.Decode(&t)
+	if err != nil {
+		log.Println(err)
+	}
+	defer r.Body.Close()
+	if g.Mode != t.Mode {
+		resetGame(&g)
+		g.Mode = t.Mode
+	}
+	if g.Mode == "solo" {
+		if g.Players[0].Name == "" || (g.Players[0].Name != "" && t.Player != g.Players[0].Name) {
+			g.Players[0].Name = t.Player
+			g.Players[1].Name = "AI"
+		}
+	} else if g.Mode == "multi" {
+		if g.Players[0].Name == "" {
+			g.Players[0].Name = t.Player
+		} else if g.Players[1].Name == "" {
+			g.Players[1].Name = t.Player
+		} else {
+			resetGame(&g)
+			g.Players[0].Name = t.Player
 		}
 	}
+	sendState(w, r)
 }
 
-var iaPlaying = false
-var lost = false
-
-func reset(w http.ResponseWriter, r *http.Request) {
-	lost = false
-	resetBoard()
-	current = 0
-	g.Players[0].Score = 0
-	g.Players[1].Score = 0
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	json.NewEncoder(w).Encode(g)
-}
-
-func board(w http.ResponseWriter, r *http.Request) {
-	if lost {
-		w.WriteHeader(202)
-		w.Header().Set("Content-Type", "application/json")
-		json.NewEncoder(w).Encode(g)
-		return
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	json.NewEncoder(w).Encode(g)
-}
 func getBoard(w http.ResponseWriter, r *http.Request) {
 	if iaPlaying {
 		http.Error(w, "AI PLAYING", 400)
@@ -96,79 +139,30 @@ func getBoard(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	defer r.Body.Close()
-	if t.Player != g.Players[current].Name {
+	if t.Player != g.Players[g.Current].Name {
 		http.Error(w, "Not your turn bitch", 400)
 		return
 	}
-	nb := countEnemyPawns(g.Board, current)
-	err = move(g.Board, t, current, &g.Board)
-	end := countEnemyPawns(g.Board, current)
-	if end == nb-2 {
-		g.Players[current].Score += 2
-	}
-	if g.Players[current].Score >= 10 {
-		lost = true
-		w.WriteHeader(201)
-		json.NewEncoder(w).Encode(g)
-		return
-	}
+	pCapturedCount := 0
+	err = move(g.Board, t, g.Current, &g.Board, &pCapturedCount)
 	if err != nil {
 		log.Println(err)
 		if err.Error() == "Game Over" {
-			lost = true
-			w.WriteHeader(201)
+			setWinner(&g)
+			sendState(w, r)
 		} else {
 			http.Error(w, err.Error(), 400)
 		}
 		return
-	} else {
-		current = (current + 1) % 2
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	json.NewEncoder(w).Encode(g)
-}
-
-func startGame(w http.ResponseWriter, r *http.Request) {
-	decoder := json.NewDecoder(r.Body)
-	var t start
-	err := decoder.Decode(&t)
-	if err != nil {
-		log.Println(err)
+	g.Players[g.Current].Score += pCapturedCount
+	if g.Players[g.Current].Score >= 10 {
+		setWinner(&g)
+		sendState(w, r)
+		return
 	}
-	defer r.Body.Close()
-	if g.Mode != t.Mode {
-		lost = false
-		resetBoard()
-		current = 0
-		g.Players[0].Score = 0
-		g.Players[1].Score = 0
-		g.Mode = t.Mode
-	}
-	if g.Mode == "solo" {
-		if g.Players[0].Name == "" || (g.Players[0].Name != "" && t.Player != g.Players[0].Name) {
-			g.Players[0].Name = t.Player
-			g.Players[1].Name = "AI"
-		}
-	} else if g.Mode == "multi" {
-		if g.Players[0].Name == "" {
-			g.Players[0].Name = t.Player
-		} else if g.Players[1].Name == "" {
-			g.Players[1].Name = t.Player
-		} else {
-			g.Players[0].Name = t.Player
-			g.Players[1].Name = ""
-			lost = false
-			resetBoard()
-			current = 0
-			g.Players[0].Score = 0
-			g.Players[1].Score = 0
-		}
-	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	json.NewEncoder(w).Encode(g)
-
+	g.Current = (g.Current + 1) % 2
+	sendState(w, r)
 }
 
 func play(w http.ResponseWriter, r *http.Request) {
@@ -183,41 +177,35 @@ func play(w http.ResponseWriter, r *http.Request) {
 		panic(err)
 	}
 	defer r.Body.Close()
-	if g.Mode == "solo" && lost == false {
+	if g.Mode == "solo" && !g.GameOver {
 		iaPlaying = true
 		start := time.Now()
 		t = aiPlay()
 		g.Time = (time.Since(start) / 1000000)
-		nb := countEnemyPawns(g.Board, current)
-		err = move(g.Board, t, current, &g.Board)
-		end := countEnemyPawns(g.Board, current)
-		if end == nb-2 {
-			g.Players[current].Score += 2
-		}
-		if g.Players[current].Score >= 10 {
-			lost = true
-			w.WriteHeader(201)
-			json.NewEncoder(w).Encode(g)
-			iaPlaying = false
-			return
-		}
-		current = (current + 1) % 2
+
+		pCapturedCount := 0
+		err = move(g.Board, t, g.Current, &g.Board, &pCapturedCount)
 		if err != nil {
 			if err.Error() == "Game Over" {
-				lost = true
-				w.WriteHeader(201)
-				json.NewEncoder(w).Encode(g)
+				setWinner(&g)
+				sendState(w, r)
 			} else {
 				http.Error(w, err.Error(), 400)
 			}
 			iaPlaying = false
 			return
 		}
+		g.Players[g.Current].Score += pCapturedCount
+		if g.Players[g.Current].Score >= 10 {
+			setWinner(&g)
+			sendState(w, r)
+			iaPlaying = false
+			return
+		}
+		g.Current = (g.Current + 1) % 2
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	json.NewEncoder(w).Encode(g)
 	iaPlaying = false
+	sendState(w, r)
 }
 
 func hint(w http.ResponseWriter, r *http.Request) {
@@ -226,16 +214,14 @@ func hint(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	var t coord
-	if lost == false {
+	if !g.GameOver {
 		iaPlaying = true
 		t = aiPlay()
 		g.Board[t.X][t.Y] = -1
 	}
-	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(200)
-	json.NewEncoder(w).Encode(g)
 	g.Board[t.X][t.Y] = 0
 	iaPlaying = false
+	sendState(w, r)
 }
 
 func main() {
@@ -246,7 +232,8 @@ func main() {
 
 	log.Println("GOMAXPROCS: ", runtime.GOMAXPROCS(0))
 
-	resetBoard()
+	resetGame(&g)
+
 	var entry string
 	var static string
 	var port string
@@ -267,7 +254,7 @@ func main() {
 	r.HandleFunc("/play", play).Methods("POST")
 	r.HandleFunc("/getboard", getBoard).Methods("POST")
 	r.HandleFunc("/reset", reset).Methods("GET")
-	r.HandleFunc("/board", board).Methods("GET")
+	r.HandleFunc("/board", sendState).Methods("GET")
 	r.HandleFunc("/hint", hint).Methods("GET")
 	// Optional: Use a custom 404 handler for our API paths.
 	// api.NotFoundHandler = JSONNotFound
