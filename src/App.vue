@@ -23,10 +23,10 @@
         <button class="w3-button w3-circle w3-black" v-on:click="next()">+</button>
         </div>
         <div align="left">
-        	<span class="w3-badge  w3-large w3-pink">{{this.score1}} </span>
+        	<span class="w3-badge  w3-large w3-pink">{{ players[0].Score }} </span>
         </div>
         <div align="right">
-        	<span class="w3-badge w3-large w3-pink">{{this.score2}} </span>
+        	<span class="w3-badge w3-large w3-pink">{{ players[1].Score }} </span>
         </div>
         <div v-if="time!=0">
         	<p> <span class="w3-badge w3-green">{{this.time}} ms</span></p>
@@ -68,8 +68,6 @@
             gameOver: false,
             winner: 0,
           	time: 0,
-          	score1: 0,
-          	score2: 0
       	}
   	  },
 
@@ -149,8 +147,6 @@
 		},
 
 	  	restart: function () {
-        	this.win = false
-        	this.lost = false
 			Vue.http.get('/reset').then(response => {
 				this.updateState(response)
 			}, err => {
