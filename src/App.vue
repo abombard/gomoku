@@ -22,7 +22,7 @@
         	<span class="w3-badge  w3-large w3-pink">{{ players[0].Score }} </span>
         </div>
         <div align="right">
-        I	<span class="w3-badge w3-large w3-pink">{{ players[1].Score }} </span>
+        	<span class="w3-badge w3-large w3-pink">{{ players[1].Score }} </span>
         </div>
         <div v-if="time!=0">
         	<p> <span class="w3-badge w3-green">{{this.time}} ms</span></p>
