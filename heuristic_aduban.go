@@ -1,6 +1,6 @@
 package main
 
-//import "log"
+import "fmt"
 
 func maxval(a, b, c, d int) int {
 	best := 0
@@ -500,11 +500,14 @@ func getScore(board [][]int, player int) int {
 	return score
 }
 
+var trans = make(map[string]int)
+
 func heuristic2(board [][]int, player int) int {
+	fmt.Println(len(trans))
+	if val, ok := trans[fmt.Sprintln(board)]; ok {
+		return val
+	}
 	score := getScore(board, player)
-	/*
-		log.Println("heuristic", scoreFinal)
-		printBoard(board)
-	*/
+	trans[fmt.Sprintln(board)] = score
 	return score
 }
