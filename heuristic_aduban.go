@@ -405,7 +405,7 @@ func getScore(board [][]int, player int) int {
 		s := curScore
 		if s+curSpacePrev+curSpaceNext >= 5 {
 			s *= s
-			if s >= 5 {
+			if curScore >= 5 {
 				s *= 5
 			}
 			if isEnemy(curP, player) {
