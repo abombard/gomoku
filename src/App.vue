@@ -22,7 +22,7 @@
         	<span class="w3-badge  w3-large w3-pink">{{this.score1}} </span>
         </div>
         <div align="right">
-        I	<span class="w3-badge w3-large w3-pink">{{this.score2}} </span>
+        	<span class="w3-badge w3-large w3-pink">{{this.score2}} </span>
         </div>
         <div v-if="time!=0">
         	<p> <span class="w3-badge w3-green">{{this.time}} ms</span></p>
