@@ -18,6 +18,10 @@
   			:board="this.board"
   			:cellOnClick="this.play"
   		/>
+        <div align="center">
+        <button class="w3-button w3-circle w3-black" v-on:click="previous()">-</button>
+        <button class="w3-button w3-circle w3-black" v-on:click="next()">+</button>
+        </div>
         <div align="left">
         	<span class="w3-badge  w3-large w3-pink">{{this.score1}} </span>
         </div>
@@ -89,6 +93,20 @@
 			})
       	},
 
+        previous: function () {
+			Vue.http.get('/previous').then(response => {
+				this.updateState(response)
+			}, err => {
+				console.log(`/previous ${err.body}`)
+			})
+      	},
+        next: function () {
+			Vue.http.get('/next').then(response => {
+				this.updateState(response)
+			}, err => {
+				console.log(`/next ${err.body}`)
+			})
+      	},
 	  	updateState: function (res) {
 	  	  	res.json().then(state => {
 	  	 		this.board = state.Board;

@@ -26,8 +26,10 @@ type Gomoku struct {
 	Players  [2]player
 	GameOver bool
 	Winner   int
+	Index    int
 }
 
+var boards [][][]int
 var g Gomoku
 var iaPlaying = false
 
@@ -62,6 +64,7 @@ func resetGame(gc *Gomoku) {
 	gc.Current = 0
 	gc.Mode = ""
 	gc.Time = 0
+	gc.Index = 0
 	gc.Players[0].Name = ""
 	gc.Players[0].Score = 0
 	gc.Players[1].Name = ""
@@ -74,6 +77,9 @@ func reset(w http.ResponseWriter, r *http.Request) {
 	resetBoard()
 	g.Current = 0
 	g.Time = 0
+	g.Index = 0
+	boards = boards[:0]
+	boards = append(boards, boardCopy(g.Board))
 	g.Players[0].Score = 0
 	g.Players[1].Score = 0
 	g.GameOver = false
@@ -93,6 +99,7 @@ type start struct {
 }
 
 func startGame(w http.ResponseWriter, r *http.Request) {
+	g.Index = 0
 	decoder := json.NewDecoder(r.Body)
 	var t start
 	err := decoder.Decode(&t)
@@ -119,6 +126,9 @@ func startGame(w http.ResponseWriter, r *http.Request) {
 			g.Players[0].Name = t.Player
 		}
 	}
+	if len(boards) == 0 {
+		boards = append(boards, boardCopy(g.Board))
+	}
 	sendState(w, r)
 }
 
@@ -126,10 +136,13 @@ func getBoard(w http.ResponseWriter, r *http.Request) {
 	if iaPlaying {
 		http.Error(w, "AI PLAYING", 400)
 		return
-
 	}
 	if g.Mode == "" {
 		http.Error(w, "No mode selected yet", 400)
+		return
+	}
+	if g.Index != len(boards)-1 {
+		http.Error(w, "Not at latest board", 400)
 		return
 	}
 	decoder := json.NewDecoder(r.Body)
@@ -162,6 +175,8 @@ func getBoard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	g.Current = (g.Current + 1) % 2
+	g.Index++
+	boards = append(boards, boardCopy(g.Board))
 	sendState(w, r)
 }
 
@@ -203,6 +218,8 @@ func play(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		g.Current = (g.Current + 1) % 2
+		g.Index++
+		boards = append(boards, boardCopy(g.Board))
 	}
 	iaPlaying = false
 	sendState(w, r)
@@ -221,6 +238,26 @@ func hint(w http.ResponseWriter, r *http.Request) {
 	}
 	g.Board[t.X][t.Y] = 0
 	iaPlaying = false
+	sendState(w, r)
+}
+
+func previous(w http.ResponseWriter, r *http.Request) {
+	if g.Index == 0 {
+		http.Error(w, "Already at first state", 400)
+		return
+	}
+	g.Index--
+	g.Board = boardCopy(boards[g.Index])
+	sendState(w, r)
+}
+
+func next(w http.ResponseWriter, r *http.Request) {
+	if g.Index == len(boards)-1 {
+		http.Error(w, "Already at last state", 400)
+		return
+	}
+	g.Index++
+	g.Board = boardCopy(boards[g.Index])
 	sendState(w, r)
 }
 
@@ -256,6 +293,8 @@ func main() {
 	r.HandleFunc("/reset", reset).Methods("GET")
 	r.HandleFunc("/board", sendState).Methods("GET")
 	r.HandleFunc("/hint", hint).Methods("GET")
+	r.HandleFunc("/previous", previous).Methods("GET")
+	r.HandleFunc("/next", next).Methods("GET")
 	// Optional: Use a custom 404 handler for our API paths.
 	// api.NotFoundHandler = JSONNotFound
 
