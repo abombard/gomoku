@@ -159,8 +159,6 @@
 
 			this.createRoom(RoomName, "solo")
 			this.joinRoom(RoomName)
-
-			this.startGame()
 		},
 
 		multiOnClick: function () {

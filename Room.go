@@ -279,6 +279,10 @@ func JoinRoom(w http.ResponseWriter, r *http.Request) {
 
 	room.AddPlayer(req.UserName)
 
+	if room.PlayerCount == room.PlayerCountMax {
+		room.StartGame()
+	}
+
 	roomState := room.GetState(req.UserName)
 	intSendGameState(w, r, roomState)
 
