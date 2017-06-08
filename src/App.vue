@@ -1,4 +1,5 @@
 <template>
+	<!-- Home -->
 	<div v-if="AppState=='home'" class="w3-section">
       <div align="center">
   		<button class="w3-button w3-ripple w3-red w3-padding w3-round-xxlarge w3-xxlarge"
@@ -14,6 +15,8 @@
       </div>
       </div>
   	</div>
+
+  	<!-- Rooms -->
   	<div v-else-if="AppState=='rooms'">
   		<p>Available rooms:</p>
   		<div class="w3-section">
@@ -39,6 +42,8 @@
   	    	</button>
   	    </div>
   	</div>
+
+  	<!-- Game -->
 	<div v-else-if="AppState=='game'" id="App">
     	<div v-if="error!=undefined" class="w3-red">
         	{{this.error}}
