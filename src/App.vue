@@ -124,7 +124,7 @@
   	  		Rooms: undefined,
   	  		RoomName: "",
   	  		Board: undefined,
-            Players: [{Name:"", Score:0}, {Name:"", Score:0}],
+            Players: [{Name:"", Score:0, Index: 0}, {Name:"", Score:0, Index: 0}],
             Current: 0,
             GameOver: false,
             Winner: 0,

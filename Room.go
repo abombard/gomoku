@@ -165,9 +165,9 @@ func (room *Room) GetState(UserName string) GameState {
 		return state
 	}
 
-	if room.Players[0].Name == UserName {
+	if room.Players[0].Name == UserName && room.Players[0].Index != room.HistoryLen-1 {
 		state.Board = room.History[room.Players[0].Index]
-	} else if room.Players[1].Name == UserName {
+	} else if room.Players[1].Name == UserName && room.Players[0].Index != room.HistoryLen-1 {
 		state.Board = room.History[room.Players[1].Index]
 	}
 
