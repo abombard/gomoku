@@ -3,7 +3,7 @@
 <div>
     <!-- display some infos -->
     <div class="w3-panel" style="height:20px">
-        <div v-if="AppState=='game' && GameOver==true" class="w3-panel" align="center">
+        <div v-if="AppState=='game' && GameOver==true" align="center">
           	<div v-if="Players[Winner].Name==UserID" class="w3-green">
           		YOU WON !
           	</div>
@@ -60,7 +60,7 @@
   	</div>
 
   	<!-- Game -->
-	<div v-else-if="AppState=='game'" id="App">
+	<div v-else-if="AppState=='game'" id="App" class="w3-container">
   		<Board
   			:board="this.Board"
   			:cellOnClick="this.cellOnClick"
