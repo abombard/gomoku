@@ -45,8 +45,8 @@
 
   	<!-- Game -->
 	<div v-else-if="AppState=='game'" id="App">
-    	<div v-if="error!=undefined" class="w3-red">
-        	{{this.error}}
+    	<div v-if="Error!=undefined" class="w3-red">
+        	{{this.Error}}
     	</div>
   		<Board
   			:board="this.Board"
