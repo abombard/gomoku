@@ -1,17 +1,19 @@
 <template>
 	<div v-if="board == undefined" class="w3-section">
+      <div align="center">
   		<button
-  			class="w3-button w3-ripple w3-red w3-padding"
+  			class="w3-button w3-ripple w3-red w3-padding w3-round-xxlarge w3-xxlarge"
   	    	v-on:click="startGame('solo')"
   	  	>
   	  		Solo
   	  	</button>
   	  	<button
-  	  	  	class="w3-button w3-ripple w3-purple"
+  	  	  	class="w3-button w3-ripple w3-purple w3-round-xxlarge w3-xxlarge"
   	  	  	v-on:click="startGame('multi')"
   	  	>
   	  		Multi
   	  	</button>
+      </div>
   	</div>
 	<div v-else id="App">
           	<div v-if="error!=undefined" class="w3-red">
