@@ -71,10 +71,10 @@ func min(n1, n2 int) int {
 
 var killer [MAXDEPTH + 1][]coord
 
-func recminmax(board [][]int, player, depth, alpha, beta int, gameOver bool) step {
+func recminmax(board [][]int, refPlayer, player, depth, alpha, beta int, gameOver bool) step {
 
 	if depth == 0 || gameOver {
-		score := (depth + 1) * heuristic2(board, g.Current)
+		score := (depth + 1) * heuristic2(board, refPlayer)
 		return step{score: score}
 	}
 
@@ -92,7 +92,7 @@ func recminmax(board [][]int, player, depth, alpha, beta int, gameOver bool) ste
 	}
 
 	var v step
-	if player == g.Current {
+	if player == refPlayer {
 		v = step{score: -10000000}
 	} else {
 		v = step{score: 10000000}
@@ -113,12 +113,12 @@ func recminmax(board [][]int, player, depth, alpha, beta int, gameOver bool) ste
 			continue
 		}
 
-		s := recminmax(newBoard, (player+1)%2, depth-1, alpha, beta, gameOver)
+		s := recminmax(newBoard, refPlayer, (player+1)%2, depth-1, alpha, beta, gameOver)
 		s.coord = nextMoves[i]
 
 		board[nextMoves[i].X][nextMoves[i].Y] = 0
 
-		if player == g.Current {
+		if player == refPlayer {
 			v = maxstep(v, s)
 			alpha = max(alpha, s.score)
 		} else {
@@ -177,7 +177,7 @@ func minmax(board [][]int, player int) coord {
 
 	b := boardCopy(board)
 
-	v := recminmax(b, player, MAXDEPTH, -10000, 10000, false)
+	v := recminmax(b, player, player, MAXDEPTH, -10000, 10000, false)
 
 	//log.Println("THE CHOOSEN ONE : ", v)
 

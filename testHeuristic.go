@@ -8,99 +8,101 @@ func printBoard(b [][]int) {
 	}
 }
 
-func p1(x, y int) {
-	g.Board[x][y] = 1
+func (room *Room) p1(x, y int) {
+	room.Board[x][y] = 1
 }
 
-func p2(x, y int) {
-	g.Board[x][y] = 2
+func (room *Room) p2(x, y int) {
+	room.Board[x][y] = 2
 }
 
-func test() {
-	score := heuristic2(g.Board, 0)
+func (room *Room) test() {
+	score := heuristic2(room.Board, 0)
 	log.Println("score", score)
-	printBoard(g.Board)
+	printBoard(room.Board)
 }
 
 func TESTHEURISTIC() {
 
-	resetBoard()
+	room := NewRoom()
 
-	p1(5, 5)
-	p1(5, 6)
+	room.RestartGame()
 
-	p2(7, 1)
-	p2(7, 7)
+	room.p1(5, 5)
+	room.p1(5, 6)
 
-	test()
+	room.p2(7, 1)
+	room.p2(7, 7)
 
-	resetBoard()
+	room.test()
 
-	p1(5, 5)
-	p1(5, 6)
-	p1(5, 7)
+	room.RestartGame()
 
-	p2(6, 5)
-	p2(6, 6)
-	p2(6, 7)
+	room.p1(5, 5)
+	room.p1(5, 6)
+	room.p1(5, 7)
 
-	test()
+	room.p2(6, 5)
+	room.p2(6, 6)
+	room.p2(6, 7)
 
-	resetBoard()
+	room.test()
 
-	p1(5, 5)
-	p1(5, 6)
-	p1(5, 7)
+	room.RestartGame()
 
-	p2(5, 8)
-	p2(6, 6)
-	p2(6, 7)
+	room.p1(5, 5)
+	room.p1(5, 6)
+	room.p1(5, 7)
 
-	test()
+	room.p2(5, 8)
+	room.p2(6, 6)
+	room.p2(6, 7)
 
-	resetBoard()
+	room.test()
 
-	p1(5, 5)
-	p1(5, 6)
-	p1(7, 7)
+	room.RestartGame()
 
-	p2(7, 4)
-	p2(7, 5)
-	p2(7, 6)
+	room.p1(5, 5)
+	room.p1(5, 6)
+	room.p1(7, 7)
 
-	test()
+	room.p2(7, 4)
+	room.p2(7, 5)
+	room.p2(7, 6)
 
-	resetBoard()
+	room.test()
 
-	p1(5, 5)
-	p1(5, 6)
-	p1(7, 10)
+	room.RestartGame()
 
-	p2(7, 4)
-	p2(7, 5)
-	p2(7, 6)
+	room.p1(5, 5)
+	room.p1(5, 6)
+	room.p1(7, 10)
 
-	test()
+	room.p2(7, 4)
+	room.p2(7, 5)
+	room.p2(7, 6)
 
-	resetBoard()
+	room.test()
 
-	p1(5, 5)
-	p1(6, 5)
-	p1(7, 5)
+	room.RestartGame()
 
-	p2(7, 6)
-	p2(7, 7)
-	p2(8, 7)
-	p2(9, 7)
+	room.p1(5, 5)
+	room.p1(6, 5)
+	room.p1(7, 5)
 
-	p1(6, 7)
-	p1(10, 7)
+	room.p2(7, 6)
+	room.p2(7, 7)
+	room.p2(8, 7)
+	room.p2(9, 7)
 
-	p2(9, 8)
-	p2(9, 9)
+	room.p1(6, 7)
+	room.p1(10, 7)
 
-	p1(9, 10)
+	room.p2(9, 8)
+	room.p2(9, 9)
 
-	test()
+	room.p1(9, 10)
+
+	room.test()
 
 }
