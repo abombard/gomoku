@@ -2,9 +2,9 @@
  	<div class="Grid">
 		<div class="Row"
 			v-for="(row, x) in board">
-			<div class="Cell w3-border w3-center"
+			<div class="Cell"
 				v-for="(cell, y) in row"
-				v-on:click="cellOnClick(x, y)">
+				v-on:click="cellOnClick(x, y)" >
 				<div v-if="cell==1" class="CellText w3-green w3-round-xxlarge">
 					{{  }}
 				</div>
@@ -43,8 +43,9 @@
 }
 
 .Cell {
-	border: 1px solid #000;
 	flex: 1;
+    background-image: url("https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSZFHosmJLbypIFnUKHhMnraRjQH0ePxt3rIIyKun5KJeYPAKIX");
+    background-size: contain;
 }
 
 .CellText {
