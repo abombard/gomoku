@@ -23,8 +23,8 @@
   			:cellOnClick="this.play"
   		/>
         <div align="center">
-        <button class="w3-button w3-circle w3-black" v-on:click="previous()">-</button>
-        <button class="w3-button w3-circle w3-black" v-on:click="next()">+</button>
+        <button  class="w3-button" v-on:click="previous()"><img src="https://d30y9cdsu7xlg0.cloudfront.net/png/6398-200.png" style="width:30%; height:30%"></button>
+        <button  class="w3-button" v-on:click="next()"><img src="https://d30y9cdsu7xlg0.cloudfront.net/png/6402-200.png" style="width:30%; height:30%"></button>
         </div>
         <div align="left">
         	<span class="w3-badge  w3-xlarge w3-pink">{{ players[0].Score }} </span>
@@ -43,6 +43,7 @@
           		YOU LOST !
           	</div>
         </div>
+        <div align="center">
   	  	<button
   	  	  	class="w3-button w3-ripple w3-purple"
   	  	  	v-on:click="restart()"
@@ -55,6 +56,7 @@
   	  	>
   	  		Hint
   	  	</button>
+        </div>
   	</div>
 </template>
 
