@@ -65,6 +65,8 @@
 	height: 60vh;
 	margin: auto;
 	flex-flow: row nowrap;
+    background-image: url("maple.jpg");
+    background-size: contain;
 }
 
 .Row {
@@ -129,6 +131,10 @@
 .Black {
     background-image: url("black.png");
     background-size: contain;
+	height:100%;
+	width:100%;
+}
+.CellText {
 	height:100%;
 	width:100%;
 }

@@ -59,7 +59,7 @@
   	  		Hint
   	  	</button>
         </div>
-  	</div>
+  </div>
 </template>
 
 <script>
@@ -189,7 +189,7 @@
 </script>
 
 <style scoped>
-.App {
-	display: flex
+#App {
+
 }
 </style>
