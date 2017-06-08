@@ -1,4 +1,21 @@
 <template>
+
+<div>
+    <!-- display some infos -->
+    <div class="w3-panel" style="height:20px">
+        <div v-if="AppState=='game' && GameOver==true" class="w3-panel" align="center">
+          	<div v-if="Players[Winner].Name==UserID" class="w3-green">
+          		YOU WON !
+          	</div>
+          	<div v-else class="w3-red">
+          		YOU LOST !
+          	</div>
+        </div>
+    	<div v-else-if="AppState=='game' && GameOver!=true && Error!=undefined" class="w3-red">
+        	{{this.Error}}
+    	</div>
+    </div>
+
 	<!-- Home -->
 	<div v-if="AppState=='home'" class="w3-section">
       <div align="center">
@@ -12,7 +29,6 @@
   	  	>
   	  		Multi
   	  	</button>
-      </div>
       </div>
   	</div>
 
@@ -45,9 +61,6 @@
 
   	<!-- Game -->
 	<div v-else-if="AppState=='game'" id="App">
-    	<div v-if="Error!=undefined" class="w3-red">
-        	{{this.Error}}
-    	</div>
   		<Board
   			:board="this.Board"
   			:cellOnClick="this.cellOnClick"
@@ -73,14 +86,6 @@
         <div v-if="Time!=0">
         	<p> <span class="w3-badge w3-green">{{this.Time}} ms</span></p>
         </div>
-        <div v-if="GameOver==true" class="w3-panel" align="center">
-          	<div v-if="Players[Winner].Name==UserID" class="w3-green">
-          		YOU WON !
-          	</div>
-          	<div v-else class="w3-red">
-          		YOU LOST !
-          	</div>
-        </div>
         <div align="center">
   	  	<button
   	  	  	class="w3-button w3-ripple w3-purple"
@@ -95,10 +100,15 @@
   	  		Hint
   	  	</button>
         </div>
-  </div>
-  	<div v-else>
+  	</div>
+	<div v-else>
   		Unknown AppState {{ AppState }}
   	</div>
+    <!-- leave some space -->
+    <div class="w3-panel">
+    </div>
+</div>
+
 </template>
 
 <script>
