@@ -1,10 +1,5 @@
 package main
 
-func aiPlay() coord {
-	coord := minmax(g.Board, g.Current)
-	return coord
-}
-
 func isPawnNearby(b [][]int, x0, y0 int) bool {
 
 	for x := -1; x < 2; x++ {
