@@ -5,13 +5,13 @@
 			<div class="Cell w3-border w3-center"
 				v-for="(cell, y) in row"
 				v-on:click="cellOnClick(x, y)">
-				<div v-if="cell==1" class="CellText w3-green">
+				<div v-if="cell==1" class="CellText w3-green w3-round-xxlarge">
 					{{  }}
 				</div>
-				<div v-else-if="cell==2" class="CellText w3-indigo">
+				<div v-else-if="cell==2" class="CellText w3-indigo w3-round-xxlarge">
    					{{  }}
    				</div>
-				<div v-else-if="cell==-1" class="CellText w3-red">
+				<div v-else-if="cell==-1" class="CellText w3-red w3-round-xxlarge">
    					{{  }}
    				</div>
    			</div>
