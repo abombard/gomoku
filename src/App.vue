@@ -52,7 +52,7 @@
         		 style="width:30%; height:30%">
         </button>
         <button class="w3-button"
-        		v-on:click="next()">
+        		v-on:click="nextOnClick">
         	<img src="https://d30y9cdsu7xlg0.cloudfront.net/png/6402-200.png"
         		 style="width:30%; height:30%">
         </button>
@@ -191,11 +191,12 @@
 
 		joinRoom: function (RoomName) {
 
-			this.AppStateGame()
-
 			this.RoomName = RoomName
+
 			Vue.http.post('/JoinRoomRequest', { UserName:this.UserID, RoomName:RoomName }).then(res => {
 				this.updateGameState(res)
+				this.AppStateGame()
+
 			}, err => {
               	this.Error = err.body
 				console.log(`/joinRoomRequest ${err.body}`)
@@ -280,7 +281,7 @@
 
         previousOnClick: function () {
 			Vue.http.post('/HistoryPrevRequest', { UserName:this.UserID, RoomName:this.RoomName }).then(res => {
-				this.updateState(res)
+				this.updateGameState(res)
 			}, err => {
               	this.Error = err.body
 				console.log(`/HistoryPrevRequest ${err.body}`)
@@ -289,7 +290,7 @@
 
         nextOnClick: function () {
 			Vue.http.post('/HistoryNextRequest', { UserName:this.UserID, RoomName:this.RoomName }).then(res => {
-				this.updateState(res)
+				this.updateGameState(res)
 			}, err => {
               	this.Error = err.body
 				console.log(`/HistoryNextRequest ${err.body}`)

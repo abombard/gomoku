@@ -133,12 +133,17 @@ func playerMove(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if room.GameState != GameStateRunning {
+		http.Error(w, "Game is not running", 400)
+		return
+	}
+
 	if req.UserName != room.Players[room.Current].Name {
 		http.Error(w, "Not your turn bitch", 400)
 		return
 	}
 
-	if room.Players[room.Current].Index != len(room.History)-1 {
+	if room.Players[room.Current].Index != room.HistoryLen-1 {
 		http.Error(w, "You can't play in History", 400)
 		return
 	}
@@ -158,9 +163,10 @@ func playerMove(w http.ResponseWriter, r *http.Request) {
 		room.SetWinner()
 	} else {
 		room.History = append(room.History, boardCopy(room.Board))
-		room.Players[room.Current].Index += 1
+		room.HistoryLen += 1
+		room.Players[room.Current].Index = room.HistoryLen - 1
 		room.SwitchPlayer()
-		room.Players[room.Current].Index = len(room.History) - 1
+		room.Players[room.Current].Index = room.HistoryLen - 1
 	}
 
 	roomState := room.GetState(req.UserName)
@@ -207,9 +213,10 @@ func IAMove(w http.ResponseWriter, r *http.Request) {
 		room.SetWinner()
 	} else {
 		room.History = append(room.History, boardCopy(room.Board))
-		room.Players[room.Current].Index += 1
+		room.HistoryLen += 1
+		room.Players[room.Current].Index = room.HistoryLen - 1
 		room.SwitchPlayer()
-		room.Players[room.Current].Index = len(room.History) - 1
+		room.Players[room.Current].Index = room.HistoryLen - 1
 	}
 
 	roomState := room.GetState(req.UserName)
@@ -325,7 +332,7 @@ func main() {
 	r.HandleFunc("/StartGameRequest", startGame).Methods("POST")
 	r.HandleFunc("/PlayerMoveRequest", playerMove).Methods("POST")
 	r.HandleFunc("/IAMoveRequest", IAMove).Methods("POST")
-	r.HandleFunc("/HintRequest", hint).Methods("GET")
+	r.HandleFunc("/HintRequest", hint).Methods("POST")
 	r.HandleFunc("/HistoryPrevRequest", historyPrev).Methods("POST")
 	r.HandleFunc("/HistoryNextRequest", historyNext).Methods("POST")
 	// Optional: Use a custom 404 handler for our API paths.

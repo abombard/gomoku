@@ -19,7 +19,8 @@ type Room struct {
 	Mode      string
 	Board     [][]int
 
-	History [][][]int
+	History    [][][]int
+	HistoryLen int
 
 	Players        [2]player
 	PlayerCountMax int
@@ -47,6 +48,7 @@ func NewRoom() *Room {
 		Mode:           "",
 		Board:          newBoard(),
 		History:        make([][][]int, 0),
+		HistoryLen:     0,
 		Players:        [2]player{{Name: "", Score: 0, Index: 0}, {Name: "", Score: 0, Index: 0}},
 		PlayerCount:    0,
 		PlayerCountMax: 2,
@@ -106,6 +108,7 @@ func (room *Room) StartGame() error {
 
 	room.History = make([][][]int, 0)
 	room.History = append(room.History, boardCopy(room.Board))
+	room.HistoryLen = 1
 
 	room.Players[0].Index = 0
 	room.Players[1].Index = 0
@@ -125,6 +128,7 @@ func (room *Room) RestartGame() error {
 
 	room.History = make([][][]int, 0)
 	room.History = append(room.History, boardCopy(room.Board))
+	room.HistoryLen = 1
 
 	room.Players[0].Index = 0
 	room.Players[1].Index = 0
@@ -190,13 +194,6 @@ func (room *Room) SwitchPlayer() {
 
 }
 
-func (room *Room) MakeMove(mv coord) {
-
-	room.History = append(room.History, boardCopy(room.Board))
-	room.Board[mv.X][mv.Y] = room.Current
-	room.SwitchPlayer()
-}
-
 func (room *Room) HistoryPrev(UserName string) {
 
 	if room.Players[0].Name == UserName && room.Players[0].Index > 0 {
@@ -209,9 +206,9 @@ func (room *Room) HistoryPrev(UserName string) {
 
 func (room *Room) HistoryNext(UserName string) {
 
-	if room.Players[0].Name == UserName && room.Players[0].Index < len(room.History) {
+	if room.Players[0].Name == UserName && room.Players[0].Index < room.HistoryLen-1 {
 		room.Players[0].Index += 1
-	} else if room.Players[1].Name == UserName && room.Players[0].Index < len(room.History) {
+	} else if room.Players[1].Name == UserName && room.Players[0].Index < room.HistoryLen-1 {
 		room.Players[1].Index += 1
 	}
 
