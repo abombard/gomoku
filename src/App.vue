@@ -14,6 +14,10 @@
   	  	</button>
   	</div>
 	<div v-else id="App">
+          	<div v-if="error!=undefined" class="w3-red">
+          		{{this.error}}
+          	</div>
+
   		<Board
   			:board="this.board"
   			:cellOnClick="this.play"
@@ -23,10 +27,10 @@
         <button class="w3-button w3-circle w3-black" v-on:click="next()">+</button>
         </div>
         <div align="left">
-        	<span class="w3-badge  w3-large w3-pink">{{ players[0].Score }} </span>
+        	<span class="w3-badge  w3-xlarge w3-pink">{{ players[0].Score }} </span>
         </div>
         <div align="right">
-        	<span class="w3-badge w3-large w3-pink">{{ players[1].Score }} </span>
+        	<span class="w3-badge w3-xlarge w3-pink">{{ players[1].Score }} </span>
         </div>
         <div v-if="time!=0">
         	<p> <span class="w3-badge w3-green">{{this.time}} ms</span></p>
@@ -68,6 +72,7 @@
             gameOver: false,
             winner: 0,
           	time: 0,
+            error : undefined
       	}
   	  },
 
@@ -79,6 +84,7 @@
 			Vue.http.get('/board').then(response => {
 				this.updateState(response)
 			}, err => {
+              this.error = err.body
 				console.log(`/board ${err.body}`)
 			})
         },
@@ -87,6 +93,7 @@
 			Vue.http.get('/hint').then(response => {
 				this.updateState(response)
 			}, err => {
+              this.error = err.body
 				console.log(`/hint ${err.body}`)
 			})
       	},
@@ -95,6 +102,7 @@
 			Vue.http.get('/previous').then(response => {
 				this.updateState(response)
 			}, err => {
+              this.error = err.body
 				console.log(`/previous ${err.body}`)
 			})
       	},
@@ -102,6 +110,7 @@
 			Vue.http.get('/next').then(response => {
 				this.updateState(response)
 			}, err => {
+              this.error = err.body
 				console.log(`/next ${err.body}`)
 			})
       	},
@@ -114,9 +123,13 @@
 	  	 		this.winner = state.Winner;
 	 	  	  	this.time = state.Time;
 	  	  	}, err => {
+              this.error = err.body
 				console.log(`res.json() ${err.body}`);
 			});
 	  	},
+        noerr: function () {
+          this.error = undefined
+        },
 
 	  	startGame: function (mode) {
 			console.log(`startGame ${mode}`);
@@ -124,6 +137,7 @@
 				this.updateState(response)
               	this.loop()
 			}, err => {
+              this.error = err.body
 				console.log(`/startgame ${err.body}`)
 			})
 		},
@@ -140,9 +154,11 @@
                 Vue.http.post('/play', { x:x, y:y, player:this.id }).then(response => {
                 	this.updateState(response)
                 }, err => {
+              this.error = err.body
                 	console.log(`/play ${err.body}`)
 		  	  	})
 		  	}, err => {
+              this.error = err.body
 			})
 		},
 
@@ -150,6 +166,7 @@
 			Vue.http.get('/reset').then(response => {
 				this.updateState(response)
 			}, err => {
+              this.error = err.body
 				console.log(`/reset ${err.body}`)
 			})
 		},
@@ -158,6 +175,7 @@
             this.loadData();
 
             setInterval(function () {
+			this.error = undefined
             	this.loadData();
             }.bind(this), 3000); 
         }

@@ -29,9 +29,9 @@
 
 <style scoped>
 .Grid {
-	width: 70vh;
+	width: 60vh;
 	display: flex;
-	height: 70vh;
+	height: 60vh;
 	margin: auto;
 	flex-flow: row nowrap;
 }
