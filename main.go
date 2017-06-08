@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -18,247 +19,286 @@ const (
 	HEIGHT = 19
 )
 
-type Gomoku struct {
-	Board    [][]int
-	Current  int
-	Mode     string
-	Time     time.Duration
-	Players  [2]player
-	GameOver bool
-	Winner   int
-	Index    int
-}
-
-var boards [][][]int
-var g Gomoku
-var iaPlaying = false
+var hub map[string]*Room = make(map[string]*Room)
 
 type player struct {
 	Name  string
 	Score int
+	Index int
 }
+
 type coord struct {
 	X      int
 	Y      int
 	Player string
 }
 
-func sendState(w http.ResponseWriter, r *http.Request) {
+func intSendGameState(w http.ResponseWriter, r *http.Request, state GameState) {
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
-	json.NewEncoder(w).Encode(g)
+	json.NewEncoder(w).Encode(state)
+
 }
 
-func resetBoard() {
-	g.Board = make([][]int, HEIGHT)
-	for x := 0; x < HEIGHT; x++ {
-		(g.Board)[x] = make([]int, WIDTH)
-		for y := 0; y < WIDTH; y++ {
-			(g.Board)[x][y] = 0
-		}
+type GameStateRequest struct {
+	UserName string
+	RoomName string
+}
+
+func unpackGameStateRequest(r *http.Request) (GameStateRequest, error) {
+
+	decoder := json.NewDecoder(r.Body)
+	defer r.Body.Close()
+
+	var req GameStateRequest
+	err := decoder.Decode(&req)
+
+	return req, err
+}
+
+func getRoom(name string) (*Room, error) {
+
+	if room, ok := hub[name]; ok {
+		return room, nil
 	}
+
+	return nil, fmt.Errorf("Invalid room name")
 }
 
-func resetGame(gc *Gomoku) {
-	resetBoard()
-	gc.Current = 0
-	gc.Mode = ""
-	gc.Time = 0
-	gc.Index = 0
-	gc.Players[0].Name = ""
-	gc.Players[0].Score = 0
-	gc.Players[1].Name = ""
-	gc.Players[1].Score = 0
-	gc.GameOver = false
-	gc.Winner = 0
-}
+func sendGameState(w http.ResponseWriter, r *http.Request) {
 
-func reset(w http.ResponseWriter, r *http.Request) {
-	resetBoard()
-	g.Current = 0
-	g.Time = 0
-	g.Index = 0
-	boards = boards[:0]
-	boards = append(boards, boardCopy(g.Board))
-	g.Players[0].Score = 0
-	g.Players[1].Score = 0
-	g.GameOver = false
-	g.Winner = 0
-	sendState(w, r)
-}
+	req, err := unpackGameStateRequest(r)
+	if err != nil {
+		http.Error(w, "Invalid packet request", 400)
+		return
+	}
 
-func setWinner(gc *Gomoku) {
-	gc.GameOver = true
-	gc.Winner = gc.Current
-}
+	room, err := getRoom(req.RoomName)
+	if err != nil {
+		http.Error(w, err.Error(), 400)
+		return
+	}
 
-// Init
-type start struct {
-	Mode   string
-	Player string
+	roomState := room.GetState(req.UserName)
+	intSendGameState(w, r, roomState)
 }
 
 func startGame(w http.ResponseWriter, r *http.Request) {
-	g.Index = 0
-	decoder := json.NewDecoder(r.Body)
-	var t start
-	err := decoder.Decode(&t)
+
+	req, err := unpackGameStateRequest(r)
 	if err != nil {
-		log.Println(err)
+		http.Error(w, "Invalid packet request", 400)
+		return
 	}
-	defer r.Body.Close()
-	if g.Mode != t.Mode {
-		resetGame(&g)
-		g.Mode = t.Mode
+
+	room, ok := hub[req.RoomName]
+	if !ok {
+		http.Error(w, "Invalid room name", 400)
+		return
 	}
-	if g.Mode == "solo" {
-		if g.Players[0].Name == "" || (g.Players[0].Name != "" && t.Player != g.Players[0].Name) {
-			g.Players[0].Name = t.Player
-			g.Players[1].Name = "AI"
-		}
-	} else if g.Mode == "multi" {
-		if g.Players[0].Name == "" {
-			g.Players[0].Name = t.Player
-		} else if g.Players[1].Name == "" {
-			g.Players[1].Name = t.Player
-		} else {
-			resetGame(&g)
-			g.Players[0].Name = t.Player
-		}
+
+	if room.GameState == GameStateInit {
+		room.StartGame()
+	} else {
+		room.RestartGame()
 	}
-	if len(boards) == 0 {
-		boards = append(boards, boardCopy(g.Board))
-	}
-	sendState(w, r)
+
+	roomState := room.GetState(req.UserName)
+	intSendGameState(w, r, roomState)
 }
 
-func getBoard(w http.ResponseWriter, r *http.Request) {
-	if iaPlaying {
-		http.Error(w, "AI PLAYING", 400)
-		return
-	}
-	if g.Mode == "" {
-		http.Error(w, "No mode selected yet", 400)
-		return
-	}
-	if g.Index != len(boards)-1 {
-		http.Error(w, "Not at latest board", 400)
-		return
-	}
+type PlayerMoveRequest struct {
+	UserName string
+	RoomName string
+	X        int
+	Y        int
+}
+
+func playerMove(w http.ResponseWriter, r *http.Request) {
+
 	decoder := json.NewDecoder(r.Body)
-	var t coord
-	err := decoder.Decode(&t)
-	if err != nil {
-		panic(err)
-	}
 	defer r.Body.Close()
-	if t.Player != g.Players[g.Current].Name {
+
+	var req PlayerMoveRequest
+	err := decoder.Decode(&req)
+	if err != nil {
+		http.Error(w, err.Error(), 400)
+		return
+	}
+
+	room, ok := hub[req.RoomName]
+	if !ok {
+		http.Error(w, "Invalid room name", 400)
+		return
+	}
+
+	if room.GameState != GameStateRunning {
+		http.Error(w, "Game is not running", 400)
+		return
+	}
+
+	if req.UserName != room.Players[room.Current].Name {
 		http.Error(w, "Not your turn bitch", 400)
 		return
 	}
+
+	if room.Players[room.Current].Index != room.HistoryLen-1 {
+		http.Error(w, "You can't play in History", 400)
+		return
+	}
+
+	mv := coord{X: req.X, Y: req.Y}
+
 	pCapturedCount := 0
-	err = move(g.Board, t, g.Current, &g.Board, &pCapturedCount)
-	if err != nil {
-		log.Println(err)
-		if err.Error() == "Game Over" {
-			setWinner(&g)
-			sendState(w, r)
-		} else {
-			http.Error(w, err.Error(), 400)
-		}
+	err = move(room.Board, mv, room.Current, &room.Board, &pCapturedCount)
+	if err != nil && err.Error() != "Game Over" {
+		http.Error(w, err.Error(), 400)
 		return
 	}
-	g.Players[g.Current].Score += pCapturedCount
-	if g.Players[g.Current].Score >= 10 {
-		setWinner(&g)
-		sendState(w, r)
-		return
+
+	room.Players[room.Current].Score += pCapturedCount
+	if (err != nil && err.Error() == "Game Over") ||
+		room.Players[room.Current].Score >= 10 {
+		room.SetWinner()
+	} else {
+		room.History = append(room.History, boardCopy(room.Board))
+		room.HistoryLen += 1
+		room.Players[room.Current].Index = room.HistoryLen - 1
+		room.SwitchPlayer()
+		room.Players[room.Current].Index = room.HistoryLen - 1
 	}
-	g.Current = (g.Current + 1) % 2
-	g.Index++
-	boards = append(boards, boardCopy(g.Board))
-	sendState(w, r)
+
+	roomState := room.GetState(req.UserName)
+	intSendGameState(w, r, roomState)
 }
 
-func play(w http.ResponseWriter, r *http.Request) {
-	if g.Mode == "" {
-		http.Error(w, "No mode selected yet", 400)
+func IAMove(w http.ResponseWriter, r *http.Request) {
+
+	req, err := unpackGameStateRequest(r)
+	if err != nil {
+		http.Error(w, "Invalid packet request", 400)
 		return
 	}
-	decoder := json.NewDecoder(r.Body)
-	var t coord
-	err := decoder.Decode(&t)
-	if err != nil {
-		panic(err)
-	}
-	defer r.Body.Close()
-	if g.Mode == "solo" && !g.GameOver {
-		iaPlaying = true
-		start := time.Now()
-		t = aiPlay()
-		g.Time = (time.Since(start) / 1000000)
 
-		pCapturedCount := 0
-		err = move(g.Board, t, g.Current, &g.Board, &pCapturedCount)
-		if err != nil {
-			if err.Error() == "Game Over" {
-				setWinner(&g)
-				sendState(w, r)
-			} else {
-				http.Error(w, err.Error(), 400)
-			}
-			iaPlaying = false
-			return
-		}
-		g.Players[g.Current].Score += pCapturedCount
-		if g.Players[g.Current].Score >= 10 {
-			setWinner(&g)
-			sendState(w, r)
-			iaPlaying = false
-			return
-		}
-		g.Current = (g.Current + 1) % 2
-		g.Index++
-		boards = append(boards, boardCopy(g.Board))
+	room, err := getRoom(req.RoomName)
+	if err != nil {
+		http.Error(w, err.Error(), 400)
+		return
 	}
-	iaPlaying = false
-	sendState(w, r)
+
+	if room.Mode != "solo" {
+		return
+	}
+
+	if room.GameState != GameStateRunning {
+		http.Error(w, "Game is not running", 400)
+		return
+	}
+
+	start := time.Now()
+	mv := room.AIGetMove()
+	room.Time = (time.Since(start) / 1000000)
+
+	pCapturedCount := 0
+	err = move(room.Board, mv, room.Current, &room.Board, &pCapturedCount)
+	if err != nil && err.Error() != "Game Over" {
+		http.Error(w, err.Error(), 400)
+		return
+	}
+
+	room.Players[room.Current].Score += pCapturedCount
+	if (err != nil && err.Error() == "Game Over") ||
+		room.Players[room.Current].Score >= 10 {
+		room.SetWinner()
+	} else {
+		room.History = append(room.History, boardCopy(room.Board))
+		room.HistoryLen += 1
+		room.Players[room.Current].Index = room.HistoryLen - 1
+		room.SwitchPlayer()
+		room.Players[room.Current].Index = room.HistoryLen - 1
+	}
+
+	roomState := room.GetState(req.UserName)
+	intSendGameState(w, r, roomState)
 }
 
 func hint(w http.ResponseWriter, r *http.Request) {
-	if g.Mode == "" {
-		http.Error(w, "No mode selected yet", 400)
+
+	req, err := unpackGameStateRequest(r)
+	if err != nil {
+		http.Error(w, "Invalid packet request", 400)
 		return
 	}
-	var t coord
-	if !g.GameOver {
-		iaPlaying = true
-		t = aiPlay()
-		g.Board[t.X][t.Y] = -1
+
+	room, err := getRoom(req.RoomName)
+	if err != nil {
+		http.Error(w, err.Error(), 400)
+		return
 	}
-	iaPlaying = false
-	sendState(w, r)
-	g.Board[t.X][t.Y] = 0
+
+	if room.GameState != GameStateRunning {
+		http.Error(w, "Waiting for the game to start", 400)
+		return
+	}
+
+	mv := room.AIGetMove()
+	room.Board[mv.X][mv.Y] = -1
+
+	roomState := room.GetState(req.UserName)
+	intSendGameState(w, r, roomState)
+
+	room.Board[mv.X][mv.Y] = 0
 }
 
-func previous(w http.ResponseWriter, r *http.Request) {
-	if g.Index == 0 {
-		http.Error(w, "Already at first state", 400)
+func historyPrev(w http.ResponseWriter, r *http.Request) {
+
+	req, err := unpackGameStateRequest(r)
+	if err != nil {
+		http.Error(w, "Invalid packet request", 400)
 		return
 	}
-	g.Index--
-	g.Board = boardCopy(boards[g.Index])
-	sendState(w, r)
+
+	room, err := getRoom(req.RoomName)
+	if err != nil {
+		http.Error(w, err.Error(), 400)
+		return
+	}
+
+	if room.GameState != GameStateRunning {
+		http.Error(w, "Waiting for the game to start", 400)
+		return
+	}
+
+	room.HistoryPrev(req.UserName)
+
+	roomState := room.GetState(req.UserName)
+	intSendGameState(w, r, roomState)
 }
 
-func next(w http.ResponseWriter, r *http.Request) {
-	if g.Index == len(boards)-1 {
-		http.Error(w, "Already at last state", 400)
+func historyNext(w http.ResponseWriter, r *http.Request) {
+
+	req, err := unpackGameStateRequest(r)
+	if err != nil {
+		http.Error(w, "Invalid packet request", 400)
 		return
 	}
-	g.Index++
-	g.Board = boardCopy(boards[g.Index])
-	sendState(w, r)
+
+	room, err := getRoom(req.RoomName)
+	if err != nil {
+		http.Error(w, err.Error(), 400)
+		return
+	}
+
+	if room.GameState != GameStateRunning {
+		http.Error(w, "Waiting for the game to start", 400)
+		return
+	}
+
+	room.HistoryNext(req.UserName)
+
+	roomState := room.GetState(req.UserName)
+	intSendGameState(w, r, roomState)
 }
 
 func main() {
@@ -268,8 +308,6 @@ func main() {
 	*/
 
 	log.Println("GOMAXPROCS: ", runtime.GOMAXPROCS(0))
-
-	resetGame(&g)
 
 	var entry string
 	var static string
@@ -287,14 +325,16 @@ func main() {
 
 	// It's important that this is before your catch-all route ("/")
 	//	api := r.PathPrefix("/api/v1/").Subrouter()
-	r.HandleFunc("/startgame", startGame).Methods("POST")
-	r.HandleFunc("/play", play).Methods("POST")
-	r.HandleFunc("/getboard", getBoard).Methods("POST")
-	r.HandleFunc("/reset", reset).Methods("GET")
-	r.HandleFunc("/board", sendState).Methods("GET")
-	r.HandleFunc("/hint", hint).Methods("GET")
-	r.HandleFunc("/previous", previous).Methods("GET")
-	r.HandleFunc("/next", next).Methods("GET")
+	r.HandleFunc("/GameStateRequest", sendGameState).Methods("POST")
+	r.HandleFunc("/RoomsRequest", sendRooms).Methods("GET")
+	r.HandleFunc("/CreateRoomRequest", CreateRoom).Methods("POST")
+	r.HandleFunc("/JoinRoomRequest", JoinRoom).Methods("POST")
+	r.HandleFunc("/StartGameRequest", startGame).Methods("POST")
+	r.HandleFunc("/PlayerMoveRequest", playerMove).Methods("POST")
+	r.HandleFunc("/IAMoveRequest", IAMove).Methods("POST")
+	r.HandleFunc("/HintRequest", hint).Methods("POST")
+	r.HandleFunc("/HistoryPrevRequest", historyPrev).Methods("POST")
+	r.HandleFunc("/HistoryNextRequest", historyNext).Methods("POST")
 	// Optional: Use a custom 404 handler for our API paths.
 	// api.NotFoundHandler = JSONNotFound
 
