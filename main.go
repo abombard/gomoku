@@ -157,9 +157,10 @@ func playerMove(w http.ResponseWriter, r *http.Request) {
 		room.Players[room.Current].Score >= 10 {
 		room.SetWinner()
 	} else {
+		room.History = append(room.History, boardCopy(room.Board))
+		room.Players[room.Current].Index += 1
 		room.SwitchPlayer()
-		room.History = append(room.History, room.Board)
-		room.Index += 1
+		room.Players[room.Current].Index = len(room.History) - 1
 	}
 
 	roomState := room.GetState(req.UserName)
@@ -205,9 +206,10 @@ func IAMove(w http.ResponseWriter, r *http.Request) {
 		room.Players[room.Current].Score >= 10 {
 		room.SetWinner()
 	} else {
+		room.History = append(room.History, boardCopy(room.Board))
+		room.Players[room.Current].Index += 1
 		room.SwitchPlayer()
-		room.History = append(room.History, room.Board)
-		room.Index += 1
+		room.Players[room.Current].Index = len(room.History) - 1
 	}
 
 	roomState := room.GetState(req.UserName)

@@ -203,8 +203,8 @@
 		},
 
 		// App State Game
-	  	updateState: function (res) {
-	  	  	res.json().then(state => {
+	  	updateGameState: function (res) {
+	  	  	res.json().then(Game => {
 	  	 		this.Board = Game.Board;
 	  	 		this.Players = Game.Players;
 	  	 		this.Current = Game.Current;

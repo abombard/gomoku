@@ -46,7 +46,7 @@ func NewRoom() *Room {
 		GameState:      GameStateInit,
 		Mode:           "",
 		Board:          newBoard(),
-		History:        make([][][]int),
+		History:        make([][][]int, 0),
 		Players:        [2]player{{Name: "", Score: 0, Index: 0}, {Name: "", Score: 0, Index: 0}},
 		PlayerCount:    0,
 		PlayerCountMax: 2,
@@ -104,8 +104,8 @@ func (room *Room) StartGame() error {
 	room.Board = newBoard()
 	room.Current = 0
 
-	room.History = make([][][]int)
-	room.History = append(room.History, room.Board)
+	room.History = make([][][]int, 0)
+	room.History = append(room.History, boardCopy(room.Board))
 
 	room.Players[0].Index = 0
 	room.Players[1].Index = 0
@@ -123,8 +123,8 @@ func (room *Room) RestartGame() error {
 	room.Board = newBoard()
 	room.Current = 0
 
-	room.History = make([][][]int)
-	room.History = append(room.History, room.Board)
+	room.History = make([][][]int, 0)
+	room.History = append(room.History, boardCopy(room.Board))
 
 	room.Players[0].Index = 0
 	room.Players[1].Index = 0
@@ -192,7 +192,7 @@ func (room *Room) SwitchPlayer() {
 
 func (room *Room) MakeMove(mv coord) {
 
-	room.History = append(room.History, room.Board)
+	room.History = append(room.History, boardCopy(room.Board))
 	room.Board[mv.X][mv.Y] = room.Current
 	room.SwitchPlayer()
 }
