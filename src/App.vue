@@ -1,15 +1,17 @@
 <template>
 	<div v-if="AppState=='home'" class="w3-section">
+      <div align="center">
   		<button class="w3-button w3-ripple w3-red w3-padding w3-round-xxlarge w3-xxlarge"
   	    		v-on:click="soloOnClick()"
 		>
-  	  		solo
+  	  		Solo
   	  	</button>
   	  	<button class="w3-button w3-ripple w3-purple w3-padding w3-round-xxlarge w3-xxlarge"
   	  	  		v-on:click="multiOnClick"
   	  	>
-  	  		multi
+  	  		Multi
   	  	</button>
+      </div>
       </div>
   	</div>
   	<div v-else-if="AppState=='rooms'">
